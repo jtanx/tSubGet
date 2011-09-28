@@ -5,7 +5,6 @@ int wmain(int argc, wchar_t *argv[]){
 	int i;
 
 	CoInitialize(NULL);
-	
 	if (argc < 2){
 		wprintf (L"tSubGet Version 0.2\n");
 		wprintf (L"Usage: %s file1.dvr-ms [file2.dvr-ms...]\n",argv[0]);

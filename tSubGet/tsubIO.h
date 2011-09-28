@@ -1,6 +1,8 @@
 /* Header file for tsubReader.c */
 
 #include <wmsdk.h>
+#include <Dshow.h>
+#include "..\\NullGrabberIIDs\\NullGrabber_h.h"
 #pragma comment (lib,"Wmvcore.lib")
 
 #define SUB_EXT		L".srt"
@@ -22,4 +24,15 @@ typedef struct _rTime{
 
 static const wchar_t *colours[] = {L"black",L"red",L"green",L"yellow",
 									L"blue",L"magenta",L"cyan",L"white"};
+
+typedef struct _DShowGraphV2 {
+	IGraphBuilder *pGraph;
+	IMediaControl *pControl;
+	IMediaEventEx *pEvent;
+	IBaseFilter *pSourceF;
+	IBaseFilter *pNullGrabberF;
+	INullGrabber *pNullGrabber;
+	NGCALLBACK callbackRoutine;
+} DShowGraphV2;
+
 

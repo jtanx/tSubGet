@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\Bin"
+			OutputDirectory="$(SolutionDir)\Bin\Debug"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -60,6 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="..\Bin\Debug\NullGrabberIIDsD.lib strmiids.lib"
 				OutputFile="$(OutDir)\$(ProjectName)D.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -133,6 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="..\Bin\NullGrabberIIDs.lib strmiids.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -180,13 +182,21 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tsubIO.c"
-				>
-			</File>
-			<File
 				RelativePath=".\tsubMain.c"
 				>
 			</File>
+			<Filter
+				Name="I/O"
+				>
+				<File
+					RelativePath=".\tsubInput.c"
+					>
+				</File>
+				<File
+					RelativePath=".\tsubOutput.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -198,13 +208,21 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tsubIO.h"
-				>
-			</File>
-			<File
 				RelativePath=".\tsubStreamer.h"
 				>
 			</File>
+			<Filter
+				Name="I/O"
+				>
+				<File
+					RelativePath="..\NullGrabberIIDs\NullGrabber_h.h"
+					>
+				</File>
+				<File
+					RelativePath=".\tsubIO.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

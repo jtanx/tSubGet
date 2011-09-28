@@ -29,15 +29,3 @@ interface INullGrabber : IUnknown
 	HRESULT GetConnectedMediaType([out] AM_MEDIA_TYPE *pType);
 	HRESULT SetCallback([in] NGCALLBACK Callback);
 };
-
-[
-	uuid(f6a509a6-5525-47ab-bbb0-e95cb998ca70),
-	helpstring("Interface for INullGrabber"),
-]
-library NullGrabberLibrary
-{
-	importlib("stdole32.tlb");
-	importlib("stdole2.tlb");
-
-	interface INullGrabber;
-};
