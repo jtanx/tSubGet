@@ -208,7 +208,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tsubStreamer.h"
+				RelativePath=".\tsubGet.h"
 				>
 			</File>
 			<Filter

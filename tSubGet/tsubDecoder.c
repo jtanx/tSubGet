@@ -1,226 +1,191 @@
-#include "tsubStreamer.h"
+#include "tsubGet.h"
 #include "tsubDecoder.h"
 
-static int initialiseCollection(Decoder *d){
-	if (d->cCollSize == 0){
-		d->coll = (Collection*)malloc(sizeof(Collection)*BLOCK_SIZE);
-		d->cCollSize = BLOCK_SIZE;
-		if (!d->coll)
+static int initialiseTstamp(Decoder *d){
+	if (d->meta.tsIdx == d->meta.tsSize){
+		d->meta.tsSize += ALLOC_BLOCK;
+		d->ts = realloc(d->ts,sizeof(Tstamp)*d->meta.tsSize);
+		if (!d->ts)
 			return FALSE;
 	}
-	else if (d->cCollPos == d->cCollSize){
-		d->cCollSize += BLOCK_SIZE;
-		d->coll = (Collection*)realloc(d->coll,sizeof(Collection)*d->cCollSize);
-		if (!d->coll)
-			return FALSE;
-	}
-	if (!d->hasActiveColl){
-		d->hasActiveColl = TRUE;
-		memset(&(CurrentColl(d)),0,sizeof(Collection));
-		CurrentColl(d).startTime = d->cSmp.cTime;
-	}
+	d->meta.hasActiveTs = TRUE;
+	d->ts[d->meta.tsIdx].startTime = d->smp.sTime;
+	d->ts[d->meta.tsIdx].endTime = 0;
+	return TRUE;
+}
+
+__inline static int finaliseTstamp(Decoder *d){
+	d->ts[d->meta.tsIdx++].endTime = d->smp.sTime;
+	d->meta.hasActiveTs = FALSE;
 
 	return TRUE;
 }
 
-//This also needs improving. I can't think of another way to do this though.
-static int isDuplicateCollection (Decoder *d){
-	if (d->cCollPos > 0){
-		if (PreviousColl(d).cCapPos == CurrentColl(d).cCapPos){
-			int i;
-			for (i = 0; i < CurrentColl(d).cCapPos; i++){
-				if (wcscmp(PreviousColl(d).cap[i].text,CurrentColl(d).cap[i].text))
-					return FALSE;
-			}
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-__inline static void finaliseCollection(Decoder *d){
-	//If it's duplicate, go back one collection, and change its end time
-	//to reflect now.
-	if (isDuplicateCollection(d))
-		d->cCollPos--;
-	
-	CurrentColl(d).endTime = d->cSmp.cTime;
-	d->cCollPos++;
-	
-	d->hasActiveColl = FALSE;
-}
-
-static int initialiseCap(Decoder *d, int currentPacket){
-	if (!initialiseCollection(d)) //To zero the current collection, if needed.
-			return FALSE;
-
-	if (CurrentColl(d).cCapPos == CAPS_PER_COLL){ //Link it to the next group.
-		CurrentColl(d).isLinked = TRUE;
-		finaliseCollection(d);
-		if (!initialiseCollection(d))
+static int initialiseCap(Decoder *d, unsigned vPos){
+	if (d->meta.capIdx == d->meta.capSize){
+		d->meta.capSize += ALLOC_BLOCK;
+		d->caps = realloc(d->caps, sizeof(Caption)*d->meta.capSize);
+		if (!d->caps)
 			return FALSE;
 	}
-	CurrentCap(d).fgCol = WHITE;
-	CurrentCap(d).pos[0] = currentPacket;
-	d->state = DECODER_IDLE;
+	if (!d->meta.hasActiveTs){
+		if (!initialiseTstamp(d))
+			return FALSE;
+	}
+	memset(&(d->caps[d->meta.capIdx]),0,sizeof(Caption));
+	d->caps[d->meta.capIdx].pos[1] = vPos;
+	d->caps[d->meta.capIdx].colour[0] = WHITE;
+	d->caps[d->meta.capIdx].tsIndex = d->meta.tsIdx;
+	d->caps[d->meta.capIdx].lang[0] = d->meta.curLang[0];
+	d->caps[d->meta.capIdx].lang[1] = d->meta.curLang[1];
+
+	d->meta.capTextIdx = 0;
+	d->meta.state = DECODER_IDLE;
 	return TRUE;
 }
 
-__inline static void finaliseCap(Decoder *d){
-	CurrentCap(d).text[CurrentColl(d).cCapTextPos] = L'\0';
-	CurrentColl(d).cCapTextPos = 0;
-	CurrentColl(d).cCapPos++;
+__inline static int finaliseCap(Decoder *d){
+	wchar_t dec = d->caps[d->meta.capIdx].text[d->meta.capTextIdx-1] ;
+
+	switch (dec){
+		case TT_SPACE:d->caps[d->meta.capIdx].noBreak = TRUE; break;
+	}
+	d->caps[d->meta.capIdx].text[d->meta.capTextIdx] = L'\0';
+	d->meta.capIdx++;
+	d->capCount++;
+
+	return TRUE;
 }
 
-static int parseControlCode(Decoder *d, unsigned char val, int currentPacket){
-	unsigned char bgCol = CurrentCap(d).bgCol;
-	unsigned char fgCol = CurrentCap(d).fgCol;
-
+__inline static int parseControlCode(Decoder *d, unsigned char val, int vPos){
+	unsigned colour[2] = {d->caps[d->meta.capIdx].colour[0],
+						  d->caps[d->meta.capIdx].colour[1]};
 	if (val >= 0 && val <= 0x7)
-		fgCol = val;
-	switch (val){
-		case 0x1C:
-			bgCol = BLACK; break;
-		case 0x1D:
-			bgCol = fgCol; break;
-		case TT_SPACE:
-			CurrentCap(d).pos[1]++; break;
-		case 0x0B:{
-			if (d->state != DECODER_GETTEXT)
-				d->state = DECODER_GETTEXT;
-		} break;
-		case 0x0A:{ //EOL
-			if (CurrentCap(d).text[CurrentColl(d).cCapTextPos-1] == TT_SPACE)
-				CurrentCap(d).noBreak = TRUE;
-			d->state = DECODER_FINISH;
-		} break;
-	}//End switch
-	if (d->state != DECODER_IDLE && CurrentColl(d).cCapTextPos > 0){
-		if (CurrentCap(d).fgCol != fgCol ||
-			CurrentCap(d).bgCol != bgCol){
+		colour[0] = val;
+	else switch (val){
+		case 0x1C: colour[1] = BLACK; break; //BG colour becomes black
+		case 0x1D: colour[1] = colour[0]; break; //BG colour becomes FG colour
+		case 0x0B: d->meta.state = DECODER_WORKING; break; //Start of text block
+		case 0x0A: d->meta.state = DECODER_FINISH; break; //End of text block
+	}
+	if (d->meta.state != DECODER_IDLE && d->meta.capTextIdx > 0){
+		if (d->caps[d->meta.capIdx].colour[0] != colour[0] ||
+			d->caps[d->meta.capIdx].colour[1] != colour[1]){
 			finaliseCap(d);
-			if (!initialiseCap(d,currentPacket))
+			if (!initialiseCap(d,vPos))
 				return FALSE;
-			d->state = DECODER_GETTEXT;
+			
+			d->meta.state = DECODER_WORKING;
 		}
 	}
-
-	CurrentCap(d).fgCol = fgCol;
-	CurrentCap(d).bgCol = bgCol;
+	
+	d->caps[d->meta.capIdx].colour[0] = colour[0];
+	d->caps[d->meta.capIdx].colour[1] = colour[1];
 	return TRUE;
 }
 
-//Definitely needs improving...
-__inline static wchar_t translateChar(Decoder *d, unsigned char val){
-	wchar_t retVal = (wchar_t)val; //This is not exactly right, but....
-	switch (val){
-		//Latin option subset.
-		case 0x23: retVal = 0xA3; break;
-		case 0x5B: retVal = 0x2C2; break;
-		case 0x5C: retVal = 0xBD; break;
-		case 0x5D: retVal =	0x2C3; break;
-		case 0x5E: retVal = 0x2C4; break;
-		case 0x5F: retVal = 0x23; break;
-		case 0x60: retVal = 0x2013; break;
-		case 0x7B: retVal = 0xBC; break;
-		case 0x7C: retVal = 0x2225; break;
-		case 0x7D: retVal = 0xBE; break;
-		case 0x7E: retVal = 0xF7; break;
+__inline static int parseValue(Decoder *d, unsigned char val, int vPos){
+	if (d->meta.capTextIdx == CAP_LENGTH){
+		unsigned colour[2] = {d->caps[d->meta.capIdx].colour[0],
+							  d->caps[d->meta.capIdx].colour[1]};
+		unsigned hPos = d->caps[d->meta.capIdx].pos[0];
+		d->caps[d->meta.capIdx].noBreak = TRUE;
+
+		finaliseCap(d);
+		initialiseCap(d,vPos);
+		d->caps[d->meta.capIdx].colour[0] = colour[0];
+		d->caps[d->meta.capIdx].colour[1] = colour[1];
+		d->caps[d->meta.capIdx].pos[0] = hPos;
+		d->meta.state = DECODER_WORKING;
 	}
-	return retVal;
+	mbtowc(&(d->caps[d->meta.capIdx].text[d->meta.capTextIdx]),
+		   &val,1);
+	d->meta.capTextIdx++;
+
+	return TRUE;
 }
 
 static int decodeSubtitlePage(Decoder *d){
 	int i, j;
 
-	//Finalise the previous collection.
-	if (d->hasActiveColl)
-		finaliseCollection(d);
-
-	d->cSmp.cBPos = TT_PACKETSIZE + 2;
-	for (i = 0; i < TT_PACKETSPP - 1; i++, d->cSmp.cBPos += TT_PACKETSIZE){
-		unsigned char mag = fixHamm48[d->cSmp.buffer[d->cSmp.cBPos-2]] & 0x7;
-		if (mag != d->pnum.mag) continue;
+	if (d->meta.hasActiveTs)
+		finaliseTstamp(d);
+	
+	d->smp.cBPos  = TT_PACKETSIZE;
+	for (i = 0; i < TT_PACKETSPP - 1; i++, d->smp.cBPos += TT_PACKETSIZE){
+		unsigned char mag = fixHamm48[d->smp.buffer[d->smp.cBPos]] & 0x7;
+		if (mag & 0x80 || mag != d->pageNumber >> 8) continue;
 
 		if (!initialiseCap(d,i))
 			return DECODER_ERROR;
-		for (j = 0; j < TT_PACKETSIZE - 2 && d->state != DECODER_FINISH; j++){
-			unsigned char val = fixParity[d->cSmp.buffer[d->cSmp.cBPos+j]];	
-
-			if (val >= 0 && val <= 0x1F || 
-				(d->state == DECODER_IDLE && val == TT_SPACE)){
+		for (j = 2; j < TT_PACKETSIZE && d->meta.state != DECODER_FINISH; j++){
+			unsigned char val = fixParity[d->smp.buffer[d->smp.cBPos+j]];
+			
+			if (d->meta.state == DECODER_IDLE && val == TT_SPACE)
+				d->caps[d->meta.capIdx].pos[0]++;
+			else if (val >= 0x0 && val <= 0x1F){
 				if (!parseControlCode(d,val,i))
 					return DECODER_ERROR;
-			} else {
-				if (CurrentColl(d).cCapTextPos == CAPTION_SIZE-1){
-					unsigned char tempVals[2] = {CurrentCap(d).bgCol,
-												 CurrentCap(d).fgCol};
-					CurrentCap(d).noBreak = TRUE;
-					finaliseCap(d);
-					initialiseCap(d,i);
-					CurrentCap(d).bgCol = tempVals[0]; //TODO: What about position data?
-					CurrentCap(d).fgCol = tempVals[1];
-					d->state = DECODER_GETTEXT;
-				}
-				CurrentCap(d).text[CurrentColl(d).cCapTextPos++] = translateChar(d,val);
+			}
+			else{
+				if (!parseValue(d,val,i))
+					return DECODER_ERROR;
 			}
 		}
 		finaliseCap(d);
-	}
-	return DECODER_OK;
+	}//End outer for loop
+	return d->meta.state;
 }
 
-int initialiseDecoder(Decoder *d, int pageNumber){
-	if (pageNumber < 100 || pageNumber > 999)
-		return FALSE;
-
+int initialiseDecoder(Decoder *d, unsigned pageNumber, unsigned forceLang[2]){
 	memset(d,0,sizeof(Decoder));
-	d->pnum.mag = pageNumber/100;
-	d->pnum.tens = (pageNumber%100)/10;
-	d->pnum.units = pageNumber%10;
-	if (d->pnum.mag == 8) d->pnum.mag = 0;
 
+	d->pageNumber = pageNumber;
+	d->caps = malloc(sizeof(Caption)*ALLOC_BLOCK);
+	d->ts = malloc(sizeof(Tstamp)*ALLOC_BLOCK);
+	d->meta.capSize = ALLOC_BLOCK;
+	d->meta.tsSize = ALLOC_BLOCK;
+	if (forceLang[0] != 0 || forceLang[1] != 0){
+		d->meta.forceLangFlag = TRUE;
+		d->meta.forceLang[0] = forceLang[0];
+		d->meta.forceLang[1] = forceLang[1];
+	}
+	
+	if (!d->caps || !d->ts)
+		return FALSE;
 	return TRUE;
 }
 
 void finaliseDecoder(Decoder *d){
-	if (d->coll){
-		free (d->coll);
-		d->coll = NULL;
-	}
-}
-
-__inline static int isEqualPageNumbers(PageNumber p1, PageNumber p2){
-	if (p1.mag == p2.mag &&
-		p1.tens == p2.tens &&
-		p1.units == p2.units)
-		return TRUE;
-	return FALSE;
+	if (d->caps) free (d->caps);
+	if (d->ts) free (d->ts);
 }
 
 int decodeSample(Decoder *d){
 	int i;
-	unsigned char rawHeader[10]; //Sample buffer is read only.
-	PageNumber currentPnum;
+	unsigned char rawHeader[10];
+	unsigned packetNum;
 
-	if (d->cSmp.sLength < TT_PAGESIZE)
+	if (d->smp.bufLen < TT_PAGESIZE)
 		return FALSE;
 
 	for (i = 0; i < 10; i++){
-		rawHeader[i] = fixHamm48[d->cSmp.buffer[i]];
-		if (rawHeader[i] & 0x80)
-			return TRUE; //Just skip errors, (not fatal)
+		rawHeader[i] = fixHamm48[d->smp.buffer[i]];
+		if (rawHeader[i] & 0x80) //Erroneous packet
+			return TRUE;
 	}
 
-	currentPnum.mag = rawHeader[0] & 0x7;
-	currentPnum.tens = rawHeader[3];
-	currentPnum.units = rawHeader[2];
-	//TODO: Add proper language support.
-	
-	if (!isEqualPageNumbers(currentPnum,d->pnum))
+	packetNum = rawHeader[1] | rawHeader[0] >> 3;
+	if (packetNum != 0) //Currently only support Pkt/0 types
 		return TRUE;
+	//TODO: Add proper language support. Needs to be able to decode Pkt 28/Fmt 1
+	//to do so though, or just ask user...
+	d->meta.curPage = ((rawHeader[0] & 0x7) << 8)|(rawHeader[3] << 4)|(rawHeader[2]);
 	
-	if (decodeSubtitlePage(d) == DECODER_ERROR)
+	if (d->meta.curPage != d->pageNumber)
+		return TRUE;
+	else if (decodeSubtitlePage(d) == DECODER_ERROR)
 		return FALSE;
+
 	return TRUE;
 }

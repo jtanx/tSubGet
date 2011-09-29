@@ -1,4 +1,4 @@
-#include "tsubStreamer.h"
+#include "tsubGet.h"
 #include "tsubIO.h"
 
 /////////////////////////////Main Data Callback/////////////////////////////
@@ -10,11 +10,12 @@ HRESULT dataCallback(IMediaSample *pMediaSample, __int64 *start, __int64 *end){
 		return S_OK;
 	} else{
 		HRESULT hr;
-		hr = pMediaSample->lpVtbl->GetPointer(pMediaSample,&(d->cSmp.buffer));
+
+		hr = pMediaSample->lpVtbl->GetPointer(pMediaSample,&(d->smp.buffer));
 		if (FAILED(hr)) return hr;
 
-		d->cSmp.sLength = pMediaSample->lpVtbl->GetActualDataLength(pMediaSample);
-		d->cSmp.cTime = (double)(*start)/10000.0;
+		d->smp.bufLen = pMediaSample->lpVtbl->GetActualDataLength(pMediaSample);
+		d->smp.sTime = (double)(*start)/10000.0;
 		if (!decodeSample(d))
 			return S_FALSE;
 	}
@@ -22,7 +23,7 @@ HRESULT dataCallback(IMediaSample *pMediaSample, __int64 *start, __int64 *end){
 }
 
 /////////////////////////////Direct Show Stuff/////////////////////////////
-static int initGraph(DShowGraphV2 *dsg){
+static int initGraph(DShowGraph *dsg){
 	HRESULT hr;
 	IMediaFilter *pMedia;
 
@@ -34,14 +35,14 @@ static int initGraph(DShowGraphV2 *dsg){
 	dsg->pGraph->lpVtbl->QueryInterface(dsg->pGraph,&IID_IMediaControl,&(dsg->pControl));
 	dsg->pGraph->lpVtbl->QueryInterface(dsg->pGraph,&IID_IMediaEventEx,&(dsg->pEvent));
 	dsg->pGraph->lpVtbl->QueryInterface(dsg->pGraph,&IID_IMediaFilter,&pMedia);
-	//This part is important: It makes DS run as fast as possible.
+	//This part is important: It makes DS run as fast as possible, instead of at playback speed.
 	pMedia->lpVtbl->SetSyncSource(pMedia,NULL);
 	pMedia->lpVtbl->Release(pMedia);
 
 	return TRUE;
 }
 
-static int addFilters(DShowGraphV2 *dsg, wchar_t *filename){
+static int addFilters(DShowGraph *dsg, wchar_t *filename){
 	HRESULT hr;
 	AM_MEDIA_TYPE am = {0};
 	am.majortype = MEDIATYPE_MSTVCaption;
@@ -58,7 +59,10 @@ static int addFilters(DShowGraphV2 *dsg, wchar_t *filename){
 	if (FAILED(hr))
 		return FALSE;
 
-	dsg->pGraph->lpVtbl->AddFilter(dsg->pGraph, dsg->pNullGrabberF, L"Null Grabber");
+	hr = dsg->pGraph->lpVtbl->AddFilter(dsg->pGraph, dsg->pNullGrabberF,
+										L"Null Grabber");
+	if (FAILED(hr))
+		return FALSE;
 	dsg->pNullGrabberF->lpVtbl->QueryInterface(dsg->pNullGrabberF,
 								&IID_INullGrabber,&(dsg->pNullGrabber));
 
@@ -89,7 +93,7 @@ static int findPin(IEnumPins *pEnum, IPin **pin, int direction){
 	return FALSE;
 }
 
-static int connectPins(DShowGraphV2 *dsg){
+static int connectPins(DShowGraph *dsg){
 	HRESULT hr;
 	IEnumPins *pEnum;
 	IPin *pinIn,*pinOut;
@@ -117,10 +121,11 @@ static int connectPins(DShowGraphV2 *dsg){
 	return TRUE;
 }
 
-static int runGraph(DShowGraphV2 *dsg){
+static int runGraph(DShowGraph *dsg){
 	HRESULT hr;
 	long eventCode;
 
+	//You can set up event handling here AFAIK...
 	hr = dsg->pControl->lpVtbl->Run(dsg->pControl);
 	hr = dsg->pEvent->lpVtbl->WaitForCompletion(dsg->pEvent,INFINITE,&eventCode);
 	if (FAILED(hr))
@@ -128,7 +133,7 @@ static int runGraph(DShowGraphV2 *dsg){
 	return TRUE;
 }
 
-static void cleanup(DShowGraphV2 *dsg){
+static void cleanup(DShowGraph *dsg){
 	if (dsg->pNullGrabber) dsg->pNullGrabber->lpVtbl->Release(dsg->pNullGrabber);
 	if (dsg->pNullGrabberF) dsg->pNullGrabberF->lpVtbl->Release(dsg->pNullGrabberF);
 	if (dsg->pSourceF) dsg->pSourceF->lpVtbl->Release(dsg->pSourceF);
@@ -138,9 +143,9 @@ static void cleanup(DShowGraphV2 *dsg){
 }
 
 int parseFile(Decoder *d, wchar_t *filename){
-	DShowGraphV2 dsg = {0};
+	DShowGraph dsg = {0};
 	
-	//Initialise cbFunc
+	//Initialise data callback
 	dataCallback(NULL,(void*)d,NULL);
 	dsg.callbackRoutine = dataCallback;
 
@@ -151,6 +156,11 @@ int parseFile(Decoder *d, wchar_t *filename){
 	if (!connectPins(&dsg) || !runGraph(&dsg)){
 		cleanup(&dsg);
 		return FALSE;
+	}
+	//Hack to finalise the last timestamp 
+	if (d->meta.hasActiveTs){
+		d->ts[d->meta.tsIdx].endTime = d->smp.sTime;
+		d->meta.hasActiveTs = FALSE;
 	}
 	cleanup(&dsg);
 	return TRUE;

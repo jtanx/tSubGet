@@ -1,4 +1,4 @@
-#include "tsubStreamer.h"
+#include "tsubGet.h"
 
 int wmain(int argc, wchar_t *argv[]){
 	Decoder d;
@@ -13,16 +13,17 @@ int wmain(int argc, wchar_t *argv[]){
 
 	for (i = 1; i < argc; i++){
 		wchar_t subFilename[MAX_PATH];
+		int lang[2] = {0};
 
 		wprintf (L"Processing file: %s\n",argv[i]);
-		if (!initialiseDecoder(&d,801) || !parseFile(&d,argv[i])){
+		if (!initialiseDecoder(&d,001,lang) || !parseFile(&d,argv[i])){
 			wprintf (L"Error: Could not parse file: %s\n", argv[i]);
 			wprintf (L"Check that the file is a supported type, and that it has\n");
 			wprintf (L"a subtitle stream.\n");
 			return 1;
 		}
 
-		if (d.cCollSize == 0)
+		if (d.capCount == 0)
 			wprintf (L"Warning: No captions detected for %s\n",argv[i]);
 		else{
 			getSubFilename(argv[i],subFilename,MAX_PATH);

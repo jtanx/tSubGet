@@ -1,12 +1,12 @@
-#include "tsubStreamer.h"
+#include "tsubGet.h"
 #include "tsubIO.h"
 
-static void convertTime(double timeInMs, rTime *rtOut){
-	rtOut->h = (long)(timeInMs/3600000.0);
+static void convertTime(long double timeInMs, rTime *rtOut){
+	rtOut->h = (long)(timeInMs/(long double)3600000.0);
 	timeInMs -= rtOut->h*3600000;
-	rtOut->m = (long)(timeInMs/60000.0);
+	rtOut->m = (long)(timeInMs/(long double)60000.0);
 	timeInMs -= rtOut->m*60000;
-	rtOut->s = (long)(timeInMs/1000.0);
+	rtOut->s = (long)(timeInMs/(long double)1000.0);
 	timeInMs -= rtOut->s*1000;
 	rtOut->ms = (long)timeInMs;
 }
@@ -19,6 +19,33 @@ void getSubFilename(wchar_t *inputFN, wchar_t *outputFN, int szOut){
 	wcsncat_s(outputFN,szOut,SUB_EXT,_TRUNCATE);
 }
 
+int writeOutSubs(Decoder d, wchar_t *subFilename){
+	FILE *fp;
+	rTime st, et;
+	unsigned  i;
+	if (_wfopen_s(&fp,subFilename,L"w"))
+		return FALSE;
+
+	for (i = 0; i < d.capCount;){
+		unsigned tsIndex = d.caps[i].tsIndex;
+		convertTime(d.ts[tsIndex].startTime,&st);
+		convertTime(d.ts[tsIndex].endTime,&et);
+		
+		fwprintf(fp,L"%d\n",tsIndex);
+		fwprintf(fp,L"%.2ld:%.2ld:%.2ld,%ld --> %.2ld:%.2ld:%.2ld,%ld\n",
+					st.h, st.m, st.s, st.ms, et.h, et.m, et.s, et.ms);
+		while (d.caps[i].tsIndex == tsIndex){
+			fwprintf(fp,L"%s",d.caps[i].text);
+			if (!d.caps[i].noBreak)
+				fwprintf(fp,L"\n");
+			i++;
+		}
+		fwprintf(fp,L"\n");
+	}
+	return TRUE;	
+}
+
+/*
 int writeOutSubs(Decoder d, wchar_t *subFilename){
 	FILE *fp;
 	rTime st, et;
@@ -60,4 +87,4 @@ int writeOutSubs(Decoder d, wchar_t *subFilename){
 	}
 	fclose(fp);
 	return TRUE;
-}
+}*/
