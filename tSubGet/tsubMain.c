@@ -22,8 +22,9 @@ int wmain(int argc, wchar_t *argv[]){
 			wprintf (L"a subtitle stream.\n");
 			return 1;
 		}
+		finaliseDecoder(&d);
 
-		if (d.capCount == 0)
+		if (d.meta.capIdx == 0)
 			wprintf (L"Warning: No captions detected for %s\n",argv[i]);
 		else{
 			getSubFilename(argv[i],subFilename,MAX_PATH);
@@ -35,9 +36,8 @@ int wmain(int argc, wchar_t *argv[]){
 			}
 			wprintf (L"Successfully wrote out captions file.\n\n");
 		}
-		finaliseDecoder(&d);
+		freeDecoder(&d);
 	}
-
 	CoUninitialize();
 	return 0;
 }

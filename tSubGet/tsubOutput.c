@@ -26,7 +26,7 @@ int writeOutSubs(Decoder d, wchar_t *subFilename){
 	if (_wfopen_s(&fp,subFilename,L"w"))
 		return FALSE;
 
-	for (i = 0; i < d.capCount;){
+	for (i = 0; i < d.meta.capIdx;){
 		unsigned tsIndex = d.caps[i].tsIndex;
 		convertTime(d.ts[tsIndex].startTime,&st);
 		convertTime(d.ts[tsIndex].endTime,&et);
@@ -40,7 +40,7 @@ int writeOutSubs(Decoder d, wchar_t *subFilename){
 				fwprintf(fp,L"\n");
 			i++;
 		}
-		fwprintf(fp,L"\n");
+		fwprintf(fp,L"\n\n");
 	}
 	return TRUE;	
 }

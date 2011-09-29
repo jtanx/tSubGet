@@ -1,5 +1,6 @@
 extern unsigned char fixHamm48[256];
 extern unsigned char fixParity[256];
+extern const wchar_t subsets[1][13];
 
 #define TT_PACKETSIZE	42
 #define TT_PACKETSPP	26

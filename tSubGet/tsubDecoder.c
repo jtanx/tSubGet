@@ -14,7 +14,33 @@ static int initialiseTstamp(Decoder *d){
 	return TRUE;
 }
 
+__inline static int removeDuplicates(Decoder *d){
+	int cCapPos = d->meta.capIdx - 1;
+	int prevCapCount = 0;
+	int matchCount = 0;
+
+	while (cCapPos >= 0 && d->caps[cCapPos].tsIndex >= d->meta.tsIdx - 1 &&
+			d->caps[d->meta.capIdx-1-prevCapCount].tsIndex == d->meta.tsIdx){
+		if (d->caps[cCapPos].tsIndex == d->meta.tsIdx - 1){
+			prevCapCount++;
+			if (!wcscmp(d->caps[cCapPos].text,d->caps[d->meta.capIdx-prevCapCount].text))
+				matchCount++;
+			else return 0;
+		}
+		cCapPos--;
+	}
+
+	if (matchCount != 0 && prevCapCount == matchCount)
+		return matchCount;
+	return 0;
+}
+
 __inline static int finaliseTstamp(Decoder *d){
+	int ret = removeDuplicates(d);
+	if (ret > 0){
+		d->meta.tsIdx--;
+		d->meta.capIdx -= ret;
+	}
 	d->ts[d->meta.tsIdx++].endTime = d->smp.sTime;
 	d->meta.hasActiveTs = FALSE;
 
@@ -52,7 +78,6 @@ __inline static int finaliseCap(Decoder *d){
 	}
 	d->caps[d->meta.capIdx].text[d->meta.capTextIdx] = L'\0';
 	d->meta.capIdx++;
-	d->capCount++;
 
 	return TRUE;
 }
@@ -85,6 +110,7 @@ __inline static int parseControlCode(Decoder *d, unsigned char val, int vPos){
 }
 
 __inline static int parseValue(Decoder *d, unsigned char val, int vPos){
+	wchar_t parsedVal;
 	if (d->meta.capTextIdx == CAP_LENGTH){
 		unsigned colour[2] = {d->caps[d->meta.capIdx].colour[0],
 							  d->caps[d->meta.capIdx].colour[1]};
@@ -98,8 +124,21 @@ __inline static int parseValue(Decoder *d, unsigned char val, int vPos){
 		d->caps[d->meta.capIdx].pos[0] = hPos;
 		d->meta.state = DECODER_WORKING;
 	}
-	mbtowc(&(d->caps[d->meta.capIdx].text[d->meta.capTextIdx]),
-		   &val,1);
+	switch (val){
+		case 0x23: case 0x24:
+			parsedVal = subsets[0][val-0x23]; break;
+		case 0x40:
+			parsedVal = subsets[0][2]; break;
+		case 0x5B: case 0x5C: case 0x5D: case 0x5E: case 0x5F:
+			parsedVal = subsets[0][val-0x58]; break;
+		case 0x60:
+			parsedVal = subsets[0][8]; break;
+		case 0x7B: case 0x7C: case 0x7D: case 0x7E:
+			parsedVal = subsets[0][val-0x74]; break;
+		default:
+			parsedVal = (wchar_t)val;
+	}
+	d->caps[d->meta.capIdx].text[d->meta.capTextIdx] = parsedVal;
 	d->meta.capTextIdx++;
 
 	return TRUE;
@@ -157,14 +196,19 @@ int initialiseDecoder(Decoder *d, unsigned pageNumber, unsigned forceLang[2]){
 }
 
 void finaliseDecoder(Decoder *d){
-	if (d->caps) free (d->caps);
+	if (d->meta.hasActiveTs)
+		finaliseTstamp(d);
+}
+
+void freeDecoder(Decoder *d){
+	if (d->caps) free(d->caps);
 	if (d->ts) free (d->ts);
 }
 
 int decodeSample(Decoder *d){
 	int i;
 	unsigned char rawHeader[10];
-	unsigned packetNum;
+	unsigned packetNum, curPage;
 
 	if (d->smp.bufLen < TT_PAGESIZE)
 		return FALSE;
@@ -180,9 +224,9 @@ int decodeSample(Decoder *d){
 		return TRUE;
 	//TODO: Add proper language support. Needs to be able to decode Pkt 28/Fmt 1
 	//to do so though, or just ask user...
-	d->meta.curPage = ((rawHeader[0] & 0x7) << 8)|(rawHeader[3] << 4)|(rawHeader[2]);
+	curPage = ((rawHeader[0] & 0x7) << 8)|(rawHeader[3] << 4)|(rawHeader[2]);
 	
-	if (d->meta.curPage != d->pageNumber)
+	if (curPage != d->pageNumber)
 		return TRUE;
 	else if (decodeSubtitlePage(d) == DECODER_ERROR)
 		return FALSE;

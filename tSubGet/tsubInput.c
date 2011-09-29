@@ -157,11 +157,6 @@ int parseFile(Decoder *d, wchar_t *filename){
 		cleanup(&dsg);
 		return FALSE;
 	}
-	//Hack to finalise the last timestamp 
-	if (d->meta.hasActiveTs){
-		d->ts[d->meta.tsIdx].endTime = d->smp.sTime;
-		d->meta.hasActiveTs = FALSE;
-	}
 	cleanup(&dsg);
 	return TRUE;
 }

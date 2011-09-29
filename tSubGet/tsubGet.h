@@ -41,7 +41,6 @@ typedef struct _Tstamp {
 
 typedef struct _DecoderMeta {
 	unsigned state;
-	unsigned curPage;
 	unsigned curLang[2];
 	unsigned forceLang[2];
 	unsigned forceLangFlag;
@@ -59,7 +58,6 @@ typedef struct _Decoder {
 	Caption *caps;
 	Tstamp *ts;
 	unsigned pageNumber;
-	unsigned capCount; //The count of caps, NOT the index.
 } Decoder;
 
 /*
@@ -106,6 +104,7 @@ typedef struct _Decoder {
 
 int initialiseDecoder(Decoder *d, unsigned pageNumber, unsigned forceLang[2]);
 void finaliseDecoder(Decoder *d);
+void freeDecoder(Decoder *d);
 int decodeSample(Decoder *d);
 
 //tsubDecoder.c//
