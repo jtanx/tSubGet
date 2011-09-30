@@ -1,0 +1,21 @@
+#define IDI_ICON		2001
+#define IDE_OUTDIR		2002
+#define IDE_TTPAGE		2003
+#define IDL_CODEPAGE	2004
+
+#define MAIN_DIALOGUE	2100
+#define MAIN_MENU		2101
+
+#define ID_OPTIONS		3001
+#define ID_ABOUT		3002
+#define ID_FORCEDIR		3003
+#define ID_BROWSE		3004
+#define ID_ADDCOLOUR	3005
+#define ID_ADDFILES		3006
+#define ID_MAINCONTROL	3007
+#define ID_TOP			3008
+#define ID_FINISH		3009
+#define ID_NOPROMPT		3010
+
+#define IDC_STATIC		-1
+

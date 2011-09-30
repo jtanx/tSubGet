@@ -102,7 +102,6 @@ HRESULT CNullGrabber::DoRenderSample(IMediaSample *pMediaSample){
 		StartTime += m_pInputPin->CurrentStartTime();
 		StopTime  += m_pInputPin->CurrentStartTime();
 		hr = m_callback( pMediaSample, &StartTime, &StopTime);
-
 		return hr;
 	}
 	return S_OK;

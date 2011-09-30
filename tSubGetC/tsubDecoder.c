@@ -4,7 +4,7 @@
 static int initialiseTstamp(Decoder *d){
 	if (d->meta.tsIdx == d->meta.tsSize){
 		d->meta.tsSize += ALLOC_BLOCK;
-		d->ts = realloc(d->ts,sizeof(Tstamp)*d->meta.tsSize);//HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,d->ts,sizeof(Tstamp)*d->meta.tsSize);//
+		d->ts = realloc(d->ts,sizeof(Tstamp)*d->meta.tsSize);
 		if (!d->ts)
 			return FALSE;
 	}
@@ -41,8 +41,6 @@ __inline static int finaliseTstamp(Decoder *d){
 		d->meta.tsIdx--;
 		d->meta.capIdx -= ret;
 	}
-	if(d->ts[d->meta.tsIdx].startTime > d->smp.sTime)
-		d->ts[d->meta.tsIdx].startTime = 0;
 	d->ts[d->meta.tsIdx++].endTime = d->smp.sTime;
 	d->meta.hasActiveTs = FALSE;
 
@@ -52,7 +50,7 @@ __inline static int finaliseTstamp(Decoder *d){
 static int initialiseCap(Decoder *d, unsigned vPos){
 	if (d->meta.capIdx == d->meta.capSize){
 		d->meta.capSize += ALLOC_BLOCK;
-		d->caps = realloc(d->caps, sizeof(Caption)*d->meta.capSize);//HeapReAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,d->caps,sizeof(Caption)*d->meta.capSize);//
+		d->caps = realloc(d->caps, sizeof(Caption)*d->meta.capSize);
 		if (!d->caps)
 			return FALSE;
 	}
@@ -182,8 +180,8 @@ int initialiseDecoder(Decoder *d, unsigned pageNumber, unsigned forceLang[2]){
 	memset(d,0,sizeof(Decoder));
 
 	d->pageNumber = pageNumber;
-	d->caps = malloc(sizeof(Caption)*ALLOC_BLOCK);//HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(Caption)*ALLOC_BLOCK);//
-	d->ts = malloc(sizeof(Tstamp)*ALLOC_BLOCK);//HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(Tstamp)*ALLOC_BLOCK);//
+	d->caps = malloc(sizeof(Caption)*ALLOC_BLOCK);
+	d->ts = malloc(sizeof(Tstamp)*ALLOC_BLOCK);
 	d->meta.capSize = ALLOC_BLOCK;
 	d->meta.tsSize = ALLOC_BLOCK;
 	if (forceLang[0] != 0 || forceLang[1] != 0){
@@ -203,13 +201,8 @@ void finaliseDecoder(Decoder *d){
 }
 
 void freeDecoder(Decoder *d){
-	if (d->caps)
-		free(d->caps);//HeapFree(GetProcessHeap(),0,d->caps);//
-	if (d->ts)
-		free (d->ts);//HeapFree(GetProcessHeap(),0,d->ts);//
-
-	d->caps = NULL;
-	d->ts = NULL;
+	if (d->caps) free(d->caps);
+	if (d->ts) free (d->ts);
 }
 
 int decodeSample(Decoder *d){

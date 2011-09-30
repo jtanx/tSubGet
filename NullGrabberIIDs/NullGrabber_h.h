@@ -1,4 +1,4 @@
-
+//NB This file was specifically hand-modded to make it work. 
 
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 

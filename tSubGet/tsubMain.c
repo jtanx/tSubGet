@@ -1,42 +1,18 @@
-#include "tsubGet.h"
+#include "tSubGet.h"
 
-int wmain(int argc, wchar_t *argv[]){
-	Decoder d;
-	int i;
+int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE hPRev, LPWSTR lpCmdLine, int nCmdShow){
+	INITCOMMONCONTROLSEX icc = {0};
 
-	CoInitialize(NULL);
-	if (argc < 2){
-		wprintf (L"tSubGet Version 0.2\n");
-		wprintf (L"Usage: %s file1.dvr-ms [file2.dvr-ms...]\n",argv[0]);
+	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
+	icc.dwICC = ICC_STANDARD_CLASSES|ICC_PROGRESS_CLASS|ICC_BAR_CLASSES;
+	if (!InitCommonControlsEx(&icc) || CoInitialize(NULL) != S_OK){
+		MessageBox(NULL,L"Error: Could not initialise common controls!",NULL,MB_ICONEXCLAMATION);
 		return 1;
 	}
 
-	for (i = 1; i < argc; i++){
-		wchar_t subFilename[MAX_PATH];
-		int lang[2] = {0};
-
-		wprintf (L"Processing file: %s\n",argv[i]);
-		if (!initialiseDecoder(&d,001,lang) || !parseFile(&d,argv[i])){
-			wprintf (L"Error: Could not parse file: %s\n", argv[i]);
-			wprintf (L"Check that the file is a supported type, and that it has\n");
-			wprintf (L"a subtitle stream.\n");
-			return 1;
-		}
-		finaliseDecoder(&d);
-
-		if (d.meta.capIdx == 0)
-			wprintf (L"Warning: No captions detected for %s\n",argv[i]);
-		else{
-			getSubFilename(argv[i],subFilename,MAX_PATH);
-			
-			wprintf (L"Successfully parsed file. Now generating %s\n",subFilename);
-			if (!writeOutSubs(d,subFilename)){
-				wprintf (L"Error: Could not write out to %s\n",subFilename);
-				return 1;
-			}
-			wprintf (L"Successfully wrote out captions file.\n\n");
-		}
-		freeDecoder(&d);
+	if (!DialogBox(hInst,MAKEINTRESOURCE(MAIN_DIALOGUE),NULL,MainDlgProc)){
+		MessageBox(NULL,L"Error: Could not initialise main window!",NULL,MB_ICONEXCLAMATION);
+		return 1;
 	}
 	CoUninitialize();
 	return 0;
