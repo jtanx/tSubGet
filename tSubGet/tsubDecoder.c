@@ -218,7 +218,7 @@ int decodeSample(Decoder *d){
 	unsigned packetNum, curPage;
 
 	if (d->smp.bufLen < TT_PAGESIZE)
-		return FALSE;
+		return TRUE; //Not fatal.
 
 	for (i = 0; i < 10; i++){
 		rawHeader[i] = fixHamm48[d->smp.buffer[i]];

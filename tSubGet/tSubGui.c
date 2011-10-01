@@ -55,6 +55,12 @@ BOOL CALLBACK MainDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam){
 					SendMessage(hwnd,WM_COMMAND,ID_MAINCONTROL,0);
 				} break;
 
+				case ID_ABOUT:{
+					MessageBox(hwnd,L"tSubGet Version 0.5.1. Drag files to process.\r\n\r"
+									L"caktetrim (2011) - Licensed under the BSD License.",
+									L"Information",MB_ICONINFORMATION|MB_OK);
+				} break;
+
 				case ID_MAINCONTROL:{
 					if (uDets.gui.hThread)
 						SetEvent(uDets.gui.hEvent); //Abort event

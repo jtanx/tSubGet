@@ -11,6 +11,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGetC", "tSubGetC\tSubGe
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGet", "tSubGet\tSubGet.vcproj", "{D94EDAC5-8BAA-4EE3-80A4-86F339D6A1F3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E72FA970-6AFC-4BB9-B827-EA3160EA2F70} = {E72FA970-6AFC-4BB9-B827-EA3160EA2F70}
+		{AAE5C09E-517D-49E0-ADCD-B7DB1118C671} = {AAE5C09E-517D-49E0-ADCD-B7DB1118C671}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "streamDump", "streamDump\streamDump.vcproj", "{62EF1B34-8280-4C87-9581-C8A156D6B6BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +40,10 @@ Global
 		{D94EDAC5-8BAA-4EE3-80A4-86F339D6A1F3}.Debug|Win32.Build.0 = Debug|Win32
 		{D94EDAC5-8BAA-4EE3-80A4-86F339D6A1F3}.Release|Win32.ActiveCfg = Release|Win32
 		{D94EDAC5-8BAA-4EE3-80A4-86F339D6A1F3}.Release|Win32.Build.0 = Release|Win32
+		{62EF1B34-8280-4C87-9581-C8A156D6B6BE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{62EF1B34-8280-4C87-9581-C8A156D6B6BE}.Debug|Win32.Build.0 = Debug|Win32
+		{62EF1B34-8280-4C87-9581-C8A156D6B6BE}.Release|Win32.ActiveCfg = Release|Win32
+		{62EF1B34-8280-4C87-9581-C8A156D6B6BE}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

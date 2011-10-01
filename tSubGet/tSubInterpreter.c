@@ -59,6 +59,7 @@ unsigned WINAPI processInput(void *args){
 			_snwprintf_s(buffer,1024,_TRUNCATE,L"(%d/%d) No captions found: %s",
 							i+1,uDets->pi.fileCount,uDets->po.dispFilename);
 			SetWindowText(uDets->gui.hwndStatus,buffer);
+			Sleep(1000);
 			freeDecoder(&uDets->po.d);
 			continue;
 		}
