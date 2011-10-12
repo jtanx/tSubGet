@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="streamDump"
-	ProjectGUID="{62EF1B34-8280-4C87-9581-C8A156D6B6BE}"
-	RootNamespace="streamDump"
+	Name="tSubGetLib"
+	ProjectGUID="{E81B94D7-D7CC-44FB-9393-B9DD94E3D7FB}"
+	RootNamespace="tSubGetLib"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)\Bin\Debug"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
 			>
 			<Tool
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -59,18 +59,11 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\$(ProjectName)D.exe"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				AdditionalDependencies="&quot;..\Bin\Debug\NullGrabberIIDs.lib&quot; strmiids.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -82,9 +75,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -92,7 +82,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)\Bin"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -115,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -132,19 +122,11 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				AdditionalDependencies="&quot;..\Bin\NullGrabberIIDs.lib&quot; strmiids.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -154,9 +136,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -172,11 +151,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\streamDump.c"
+				RelativePath=".\tsubCaption.c"
 				>
 			</File>
 			<File
-				RelativePath=".\streamInput.c"
+				RelativePath=".\tsubCaptionInits.c"
+				>
+			</File>
+			<File
+				RelativePath=".\tsubCodes.c"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubParser.c"
+				>
+			</File>
+			<File
+				RelativePath=".\tsubReader.c"
 				>
 			</File>
 		</Filter>
@@ -190,7 +181,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\streamDump.h"
+				RelativePath=".\tSubCaption.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubGetLib.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubParser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubVersion.h"
 				>
 			</File>
 		</Filter>

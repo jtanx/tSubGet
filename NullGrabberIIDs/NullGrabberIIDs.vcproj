@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="NullGrabberIIDs"
-	ProjectGUID="{AAE5C09E-517D-49E0-ADCD-B7DB1118C671}"
+	ProjectGUID="{556C4BB2-019B-4E70-9A06-249054FEE404}"
 	RootNamespace="NullGrabberIIDs"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -60,7 +60,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\$(ProjectName)D.lib"
 				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
@@ -124,6 +123,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
 				Name="VCALinkTool"

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="tSubGet"
-	ProjectGUID="{D94EDAC5-8BAA-4EE3-80A4-86F339D6A1F3}"
+	ProjectGUID="{1446F4D3-D8FA-40EE-8DF9-0FB4FE47A5BC}"
 	RootNamespace="tSubGet"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -60,10 +60,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib strmiids.lib shlwapi.lib  ..\Bin\Debug\NullGrabberIIDsD.lib"
-				OutputFile="$(OutDir)\$(ProjectName)D.exe"
+				AdditionalDependencies="&quot;..\Bin\Debug\tSubGetLib.lib&quot;"
 				LinkIncremental="2"
-				AdditionalManifestDependencies="type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; processorArchitecture=&apos;X86&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -135,9 +133,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib strmiids.lib shlwapi.lib  ..\Bin\NullGrabberIIDs.lib"
+				AdditionalDependencies="&quot;..\Bin\tSubGetLib.lib&quot;"
 				LinkIncremental="1"
-				AdditionalManifestDependencies="type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; processorArchitecture=&apos;X86&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -176,37 +173,9 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\tSubGui.c"
+				RelativePath=".\tSubGet.c"
 				>
 			</File>
-			<File
-				RelativePath=".\tSubInterpreter.c"
-				>
-			</File>
-			<File
-				RelativePath=".\tSubMain.c"
-				>
-			</File>
-			<Filter
-				Name="I/O"
-				>
-				<File
-					RelativePath=".\tsubCodes.c"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubDecoder.c"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubInput.c"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubOutput.c"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -214,39 +183,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\tSubDefs.h"
-				>
-			</File>
-			<File
 				RelativePath=".\tSubGet.h"
 				>
 			</File>
-			<Filter
-				Name="I/O"
-				>
-				<File
-					RelativePath="..\NullGrabberIIDs\NullGrabber_h.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubDecoder.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubIO.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\tSubGet.ico"
-				>
-			</File>
 			<File
 				RelativePath=".\tSubGet.rc"
 				>

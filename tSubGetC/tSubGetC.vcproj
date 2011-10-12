@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="tSubGetC"
-	ProjectGUID="{79C6EB96-6031-41C0-8037-48E48787AFF4}"
+	ProjectGUID="{4262939D-19CF-4086-AFAB-9BC2271EC4C3}"
 	RootNamespace="tSubGetC"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -60,8 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\Bin\Debug\NullGrabberIIDsD.lib strmiids.lib"
-				OutputFile="$(OutDir)\$(ProjectName)D.exe"
+				AdditionalDependencies="&quot;..\Bin\Debug\tSubGetLib.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -134,7 +133,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\Bin\NullGrabberIIDs.lib strmiids.lib"
+				AdditionalDependencies="&quot;..\Bin\tSubGetLib.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -174,29 +173,9 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\tsubCodes.c"
+				RelativePath=".\tSubGetCMain.c"
 				>
 			</File>
-			<File
-				RelativePath=".\tsubDecoder.c"
-				>
-			</File>
-			<File
-				RelativePath=".\tsubMain.c"
-				>
-			</File>
-			<Filter
-				Name="I/O"
-				>
-				<File
-					RelativePath=".\tsubInput.c"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubOutput.c"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -204,25 +183,13 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\tsubDecoder.h"
+				RelativePath=".\tSubGetC.h"
 				>
 			</File>
 			<File
-				RelativePath=".\tsubGet.h"
+				RelativePath="..\tSubGetLib\tSubGetLib.h"
 				>
 			</File>
-			<Filter
-				Name="I/O"
-				>
-				<File
-					RelativePath="..\NullGrabberIIDs\NullGrabber_h.h"
-					>
-				</File>
-				<File
-					RelativePath=".\tsubIO.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -230,11 +197,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\tSubGet.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\tSubGet.rc"
+				RelativePath=".\tSubGetC.rc"
 				>
 			</File>
 		</Filter>

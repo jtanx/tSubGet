@@ -92,17 +92,17 @@ HRESULT CNullGrabber::CheckMediaType(const CMediaType *pmt){
 HRESULT CNullGrabber::DoRenderSample(IMediaSample *pMediaSample){
 	CheckPointer(pMediaSample, E_POINTER);
 	CAutoLock lock( &m_Lock );
+	HRESULT hr = S_OK;
 	
 	if(m_callback)
 	{
-		HRESULT hr;
 		REFERENCE_TIME StartTime, StopTime;
 		
 		pMediaSample->GetTime(&StartTime, &StopTime);
 		StartTime += m_pInputPin->CurrentStartTime();
 		StopTime  += m_pInputPin->CurrentStartTime();
 		hr = m_callback( pMediaSample, &StartTime, &StopTime);
-		return hr;
 	}
-	return S_OK;
+
+	return hr;
 }

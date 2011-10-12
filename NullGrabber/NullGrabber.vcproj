@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="NullGrabber"
-	ProjectGUID="{E72FA970-6AFC-4BB9-B827-EA3160EA2F70}"
+	ProjectGUID="{04FB05C4-B456-4D10-A20D-866EB2608F03}"
 	RootNamespace="NullGrabber"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -37,7 +37,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(IntDir)$(ProjectName).tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -63,9 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib &quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses\Debug\strmbasd.lib&quot;"
-				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="2"
-				ModuleDefinitionFile="NullRenderer.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -114,7 +111,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(ProjectName).tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -141,7 +137,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib &quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses\Release\strmbase.lib&quot;"
 				LinkIncremental="1"
-				ModuleDefinitionFile="NullRenderer.def"
+				ModuleDefinitionFile="NullGrabber.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -184,11 +180,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\NullGrabberInits.cpp"
+				RelativePath=".\NullGrabber.def"
 				>
 			</File>
 			<File
-				RelativePath=".\NullRenderer.def"
+				RelativePath=".\NullGrabberInits.cpp"
 				>
 			</File>
 		</Filter>
