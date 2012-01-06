@@ -1,10 +1,10 @@
-//NB This file was specifically hand-modded to make it work. 
+
 
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
  /* File created by MIDL compiler version 7.00.0500 */
-/* at Wed Sep 28 18:47:24 2011
+/* at Fri Jan 06 13:00:12 2012
  */
 /* Compiler settings for .\NullGrabber.idl:
     Oicf, W1, Zp8, env=Win32 (32b run)
@@ -45,38 +45,121 @@
 
 /* Forward Declarations */ 
 
+#ifndef __INullGrabberCB_FWD_DEFINED__
+#define __INullGrabberCB_FWD_DEFINED__
+typedef interface INullGrabberCB INullGrabberCB;
+#endif 	/* __INullGrabberCB_FWD_DEFINED__ */
+
+
 #ifndef __INullGrabber_FWD_DEFINED__
 #define __INullGrabber_FWD_DEFINED__
 typedef interface INullGrabber INullGrabber;
 #endif 	/* __INullGrabber_FWD_DEFINED__ */
 
 
+#ifndef __NullGrabber_FWD_DEFINED__
+#define __NullGrabber_FWD_DEFINED__
+
+#ifdef __cplusplus
+typedef class NullGrabber NullGrabber;
+#else
+typedef struct NullGrabber NullGrabber;
+#endif /* __cplusplus */
+
+#endif 	/* __NullGrabber_FWD_DEFINED__ */
+
+
 /* header files for imported files */
 #include "unknwn.h"
+#include "amstream.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif 
 
-// {3CFFEB81-A06E-4e1d-AFAB-9E6AF667D087}
-DEFINE_GUID(CLSID_NullGrabber, 
-0x3cffeb81, 0xa06e, 0x4e1d, 0xaf, 0xab, 0x9e, 0x6a, 0xf6, 0x67, 0xd0, 0x87);
 
-// {96287A17-9D0A-4bcc-AD30-1E44A0ABE9D1}
-DEFINE_GUID(IID_INullGrabber, 
-0x96287a17, 0x9d0a, 0x4bcc, 0xad, 0x30, 0x1e, 0x44, 0xa0, 0xab, 0xe9, 0xd1);
+#ifndef __INullGrabberCB_INTERFACE_DEFINED__
+#define __INullGrabberCB_INTERFACE_DEFINED__
 
-/* interface __MIDL_itf_NullGrabber_0000_0000 */
-/* [local] */ 
+/* interface INullGrabberCB */
+/* [helpstring][uuid][object] */ 
 
 
-typedef HRESULT (*NGCALLBACK) (
-    IMediaSample * pSample, 
-    REFERENCE_TIME * StartTime, 
-    REFERENCE_TIME * StopTime );
+EXTERN_C const IID IID_INullGrabberCB;
 
-extern RPC_IF_HANDLE __MIDL_itf_NullGrabber_0000_0000_v0_0_c_ifspec;
-extern RPC_IF_HANDLE __MIDL_itf_NullGrabber_0000_0000_v0_0_s_ifspec;
+#if defined(__cplusplus) && !defined(CINTERFACE)
+    
+    MIDL_INTERFACE("08478C61-D22B-416b-93B5-3379CC027A79")
+    INullGrabberCB : public IUnknown
+    {
+    public:
+        virtual HRESULT STDMETHODCALLTYPE SampleCB( 
+            /* [in] */ IMediaSample *pSample,
+            /* [in] */ REFERENCE_TIME *StartTime,
+            /* [in] */ REFERENCE_TIME *EndTime) = 0;
+        
+    };
+    
+#else 	/* C style interface */
+
+    typedef struct INullGrabberCBVtbl
+    {
+        BEGIN_INTERFACE
+        
+        HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+            INullGrabberCB * This,
+            /* [in] */ REFIID riid,
+            /* [iid_is][out] */ 
+            __RPC__deref_out  void **ppvObject);
+        
+        ULONG ( STDMETHODCALLTYPE *AddRef )( 
+            INullGrabberCB * This);
+        
+        ULONG ( STDMETHODCALLTYPE *Release )( 
+            INullGrabberCB * This);
+        
+        HRESULT ( STDMETHODCALLTYPE *SampleCB )( 
+            INullGrabberCB * This,
+            /* [in] */ IMediaSample *pSample,
+            /* [in] */ REFERENCE_TIME *StartTime,
+            /* [in] */ REFERENCE_TIME *EndTime);
+        
+        END_INTERFACE
+    } INullGrabberCBVtbl;
+
+    interface INullGrabberCB
+    {
+        CONST_VTBL struct INullGrabberCBVtbl *lpVtbl;
+    };
+
+    
+
+#ifdef COBJMACROS
+
+
+#define INullGrabberCB_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define INullGrabberCB_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define INullGrabberCB_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define INullGrabberCB_SampleCB(This,pSample,StartTime,EndTime)	\
+    ( (This)->lpVtbl -> SampleCB(This,pSample,StartTime,EndTime) ) 
+
+#endif /* COBJMACROS */
+
+
+#endif 	/* C style interface */
+
+
+
+
+#endif 	/* __INullGrabberCB_INTERFACE_DEFINED__ */
+
 
 #ifndef __INullGrabber_INTERFACE_DEFINED__
 #define __INullGrabber_INTERFACE_DEFINED__
@@ -89,7 +172,7 @@ EXTERN_C const IID IID_INullGrabber;
 
 #if defined(__cplusplus) && !defined(CINTERFACE)
     
-    MIDL_INTERFACE("4549d97d-e8ef-4fb4-896e-2f7f867eca2f")
+    MIDL_INTERFACE("96287A17-9D0A-4bcc-AD30-1E44A0ABE9D1")
     INullGrabber : public IUnknown
     {
     public:
@@ -100,7 +183,7 @@ EXTERN_C const IID IID_INullGrabber;
             /* [out] */ AM_MEDIA_TYPE *pType) = 0;
         
         virtual HRESULT STDMETHODCALLTYPE SetCallback( 
-            /* [in] */ NGCALLBACK Callback) = 0;
+            /* [in] */ INullGrabberCB *Callback) = 0;
         
     };
     
@@ -132,7 +215,7 @@ EXTERN_C const IID IID_INullGrabber;
         
         HRESULT ( STDMETHODCALLTYPE *SetCallback )( 
             INullGrabber * This,
-            /* [in] */ NGCALLBACK Callback);
+            /* [in] */ INullGrabberCB *Callback);
         
         END_INTERFACE
     } INullGrabberVtbl;
@@ -176,6 +259,25 @@ EXTERN_C const IID IID_INullGrabber;
 
 #endif 	/* __INullGrabber_INTERFACE_DEFINED__ */
 
+
+
+#ifndef __NullGrabberLib_LIBRARY_DEFINED__
+#define __NullGrabberLib_LIBRARY_DEFINED__
+
+/* library NullGrabberLib */
+/* [helpstring][uuid] */ 
+
+
+EXTERN_C const IID LIBID_NullGrabberLib;
+
+EXTERN_C const CLSID CLSID_NullGrabber;
+
+#ifdef __cplusplus
+
+class DECLSPEC_UUID("3CFFEB81-A06E-4e1d-AFAB-9E6AF667D087")
+NullGrabber;
+#endif
+#endif /* __NullGrabberLib_LIBRARY_DEFINED__ */
 
 /* Additional Prototypes for ALL interfaces */
 

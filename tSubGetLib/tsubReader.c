@@ -1,33 +1,66 @@
-#include "tsubReader.h"
-static HRESULT sampleCallback(IMediaSample *pMediaSample, __int64 *start, __int64 *end);
+#include "tsubInternal.h"
 static int initGraph(FileReader *fr);
 static int addFilters(FileReader *fr, wchar_t *fileIn);
 static int findPin(IEnumPins *pEnum, IPin **pin, int direction);
 static int connectPins(FileReader *fr);
 
+int tsgProcess(CaptionsParser *p){
+	HRESULT hr;
+	long state;
+
+	p->fr.pControl->lpVtbl->Run(p->fr.pControl);
+	do{
+		hr = p->fr.pEvent->lpVtbl->WaitForCompletion(p->fr.pEvent,100,&state);
+		if (!FAILED(hr)){
+			if (state == EC_COMPLETE){ 
+				ccEnd(p->cc, p->fr.duration);
+				p->fr.currentPos = p->fr.duration;
+
+				//IMPORTANT: Not stopping graph will lead to mem leaks
+				p->fr.pControl->lpVtbl->Stop(p->fr.pControl);
+				return PARSER_OK;
+			}
+			else return PARSER_E_IN;
+		}
+		hr = p->fr.pControl->lpVtbl->GetState(p->fr.pControl,100,&state);
+		if (FAILED(hr) || state == State_Paused){
+			p->fr.pControl->lpVtbl->Stop(p->fr.pControl);
+			if (p->fr.state == PARSER_OK) p->fr.state = PARSER_E_IN;
+			
+			return p->fr.state;
+		}
+	} while (state == State_Running);
+
+	return PARSER_E_IN;
+}
+
+int tsgGetProgress(CaptionsParser *p){
+	if (p->fr.duration > 0)
+		return (int)(p->fr.currentPos*100/p->fr.duration);
+	return 0;
+}
+
 int readerInit(CaptionsParser *p){
 	int ret;
+	if (!p)
+		return PARSER_E_PARAMS;
 
-	p->fr = calloc(1,sizeof(FileReader));
-	if (!p->fr)
-		return PARSER_E_MEM;
-	sampleCallback(NULL,(void*)p,NULL);
-	p->fr->callbackRoutine = sampleCallback;
+	ngCallbackInit(p);
 	
-	ret = initGraph(p->fr);
+	ret = initGraph(&p->fr);
 	if (ret != PARSER_OK){
 		readerClose(p);
 		return ret;
 	}
 
-	ret = addFilters(p->fr,p->fileIn);
+	ret = addFilters(&p->fr,p->po.fileIn);
 	if (ret != PARSER_OK){
 		readerClose(p);
 		return ret;
 	}
 
-	ret = connectPins(p->fr);
-	p->fr->state = PARSER_OK;
+	ret = connectPins(&p->fr);
+	p->fr.state = PARSER_OK;
 
 	if (ret != PARSER_OK)
 		readerClose(p);
@@ -35,88 +68,23 @@ int readerInit(CaptionsParser *p){
 	return ret;
 }
 
-int parserReadFile(CaptionsParser *p){
-	HRESULT hr;
-	long state;
-
-	p->fr->pControl->lpVtbl->Run(p->fr->pControl);
-	do{
-		hr = p->fr->pEvent->lpVtbl->WaitForCompletion(p->fr->pEvent,100,&state);
-		if (!FAILED(hr)){
-			if (state == EC_COMPLETE){ 
-				ccEnd(p->cc,&p->ccI,p->fr->duration);
-				p->fr->currentPos = p->fr->duration;
-
-				//IMPORTANT: Not stopping graph will lead to mem leaks
-				p->fr->pControl->lpVtbl->Stop(p->fr->pControl);
-				return PARSER_OK;
-			}
-			else return PARSER_E_IN;
-		}
-		hr = p->fr->pControl->lpVtbl->GetState(p->fr->pControl,100,&state);
-		if (FAILED(hr) || state == State_Paused){
-			p->fr->pControl->lpVtbl->Stop(p->fr->pControl);
-			if (p->fr->state == PARSER_OK) p->fr->state = PARSER_E_IN;
-			
-			return p->fr->state;
-		}
-	} while (state == State_Running);
-
-	return PARSER_E_IN;
-}
-
-int parserGetProgress(CaptionsParser *p){
-	if (p->fr && p->fr->duration > 0)
-		return (int)(p->fr->currentPos*100/p->fr->duration);
-	return 0;
-}
-
 void readerClose(CaptionsParser *p){
-	if (p->fr){
-		if (p->fr->pNullGrabber)
-			p->fr->pNullGrabber->lpVtbl->Release(p->fr->pNullGrabber);
-		if (p->fr->pNullGrabberF)
-			p->fr->pNullGrabberF->lpVtbl->Release(p->fr->pNullGrabberF);
-		if (p->fr->pSourceF)
-			p->fr->pSourceF->lpVtbl->Release(p->fr->pSourceF);
-		if (p->fr->pEvent)
-			p->fr->pEvent->lpVtbl->Release(p->fr->pEvent);
-		if (p->fr->pControl)
-			p->fr->pControl->lpVtbl->Release(p->fr->pControl);
-		if (p->fr->pStatus)
-			p->fr->pStatus->lpVtbl->Release(p->fr->pStatus);
-		if (p->fr->pGraph)
-			p->fr->pGraph->lpVtbl->Release(p->fr->pGraph);
-		free(p->fr);
-		p->fr = NULL;
-	}
+	if (p->fr.pNullGrabber)
+		p->fr.pNullGrabber->lpVtbl->Release(p->fr.pNullGrabber);
+	if (p->fr.pNullGrabberF)
+		p->fr.pNullGrabberF->lpVtbl->Release(p->fr.pNullGrabberF);
+	if (p->fr.pSourceF)
+		p->fr.pSourceF->lpVtbl->Release(p->fr.pSourceF);
+	if (p->fr.pEvent)
+		p->fr.pEvent->lpVtbl->Release(p->fr.pEvent);
+	if (p->fr.pControl)
+		p->fr.pControl->lpVtbl->Release(p->fr.pControl);
+	if (p->fr.pStatus)
+		p->fr.pStatus->lpVtbl->Release(p->fr.pStatus);
+	if (p->fr.pGraph)
+		p->fr.pGraph->lpVtbl->Release(p->fr.pGraph);
+	ZeroMemory(&p->fr, sizeof(FileReader));	
 }
-
-static HRESULT sampleCallback(IMediaSample *pMediaSample, __int64 *start, __int64 *end){
-	static CaptionsParser *p = NULL;
-
-	if (!pMediaSample && !end)
-		p = (CaptionsParser*)start;
-	else if (IsEventActive(p->hAbort)){
-		p->fr->state = PARSER_E_ABORT;
-		p->fr->pControl->lpVtbl->Pause(p->fr->pControl);
-		return S_FALSE;
-	} else{
-		Sample smp;
-		p->fr->currentPos = *start;
-
-		smp.bufSize = pMediaSample->lpVtbl->GetActualDataLength(pMediaSample);
-		pMediaSample->lpVtbl->GetPointer(pMediaSample,&smp.pBuf);
-		smp.time = *start;
-		p->fr->state = parseSample(p,smp);
-		if (p->fr->state != PARSER_OK){
-			p->fr->pControl->lpVtbl->Pause(p->fr->pControl);
-			return S_FALSE;
-		}
-	}
-	return S_OK;
-}
-
 
 static int initGraph(FileReader *fr){
 	HRESULT hr;
@@ -160,7 +128,8 @@ static int addFilters(FileReader *fr, wchar_t *fileIn){
 	if (FAILED(hr))
 		return PARSER_E_COM;
 	fr->pNullGrabber->lpVtbl->SetAcceptedMediaType(fr->pNullGrabber,&am);
-	fr->pNullGrabber->lpVtbl->SetCallback(fr->pNullGrabber,fr->callbackRoutine);
+	fr->pNullGrabber->lpVtbl->SetCallback(fr->pNullGrabber,
+											(INullGrabberCB*) &fr->NullGrabberCB);
 	return PARSER_OK;	
 }
 
@@ -199,7 +168,7 @@ static int connectPins(FileReader *fr){
 	fr->pSourceF->lpVtbl->EnumPins(fr->pSourceF,&pEnum);
 	pEnum->lpVtbl->Reset(pEnum);
 	while (findPin(pEnum,&pinOut,PINDIR_OUTPUT)){
-		hr = fr->pGraph->lpVtbl->Connect(fr->pGraph,pinOut,pinIn);
+		hr = fr->pGraph->lpVtbl->ConnectDirect(fr->pGraph, pinOut, pinIn, NULL);
 		if (hr == S_OK)
 			break;
 		pinOut->lpVtbl->Release(pinOut);

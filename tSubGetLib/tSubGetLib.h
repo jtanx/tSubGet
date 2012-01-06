@@ -5,44 +5,13 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
+#define BUILD_VERSION		L"0.85PRE"
+#define BUILD_COUNT			10
 
-typedef struct _CaptionCluster CaptionCluster;
-typedef struct _FileReader FileReader;
-
-typedef struct _ArrayInfo {
-	unsigned count;
-	unsigned index;
-} ArrayInfo;
-
-typedef struct _Sample {
-	unsigned char *pBuf;
-	__int64 time;
-	long bufSize;
-} Sample;
-
-typedef struct _CaptionsParser {
-	FileReader *fr;
-	FILE *fpOut;
-	wchar_t fileIn[MAX_PATH];
-	wchar_t fileOut[MAX_PATH];
-
-	CaptionCluster *cc;
-	ArrayInfo ccI;
-
-	HANDLE hAbort;
-
-	unsigned overwriteOutput;
-	unsigned colouredOutput;
-	unsigned lang;
-	unsigned pageNum;
-	__int64 delay;
-} CaptionsParser;
-
-enum _ParserCodes {
+enum ParserCodes {
 	PARSER_OK,
-	PARSER_W_NOCAPS,
-	PARSER_W_OUT_EXISTS,
+	PARSER_E_NOCAPS,
+	PARSER_E_OUT_EXISTS,
 	PARSER_E_PARAMS,
 	PARSER_E_FNF_IN,
 	PARSER_E_IN,
@@ -52,14 +21,29 @@ enum _ParserCodes {
 	PARSER_E_ABORT
 };
 
-//Prototypes
-int parserInit(CaptionsParser *p);
-int parserReadFile(CaptionsParser *p);
-int parserGetProgress(CaptionsParser *p);
-void parserSignalAbort(CaptionsParser *p);
-void parserGetError(int errCode, wchar_t *buf, int bufSize);
-int parserWriteout(CaptionsParser *p);
-void parserClose(CaptionsParser *p);
+typedef enum LangID {
+	LANGID_DEFAULT
+} LangID;
+
+typedef struct ParserOpts {
+	wchar_t fileIn[MAX_PATH];
+	wchar_t fileOut[MAX_PATH];
+	LangID langId;
+	char addColourTags;
+	char overwriteOutput;
+	unsigned pageNumber;	
+	__int64 delay;
+} ParserOpts;
+
+typedef struct CaptionsParser CaptionsParser;
+
+int tsgInit(CaptionsParser **p, ParserOpts *po);
+int tsgProcess(CaptionsParser *p);
+int tsgGetProgress(CaptionsParser *p);
+void tsgSignalAbort(CaptionsParser *p);
+int tsgWriteout(CaptionsParser *p);
+void tsgClose(CaptionsParser **p);
+void tsgGetError(int errCode, wchar_t *buf, int bufSize);
 
 #endif
 

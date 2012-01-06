@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="tSubGetLib"
-	ProjectGUID="{E81B94D7-D7CC-44FB-9393-B9DD94E3D7FB}"
+	ProjectGUID="{ED77E7C1-55F9-494F-9800-8704998B4B66}"
 	RootNamespace="tSubGetLib"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -60,7 +60,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="&quot;..\Bin\Debug\NullGrabberIIDs.lib&quot; strmiids.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -123,7 +122,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="&quot;..\Bin\NullGrabberIIDs.lib&quot; strmiids.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -151,15 +149,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\tsubCaption.c"
+				RelativePath=".\tSubCallback.c"
 				>
 			</File>
 			<File
-				RelativePath=".\tsubCaptionInits.c"
+				RelativePath=".\tSubCaption.c"
 				>
 			</File>
 			<File
-				RelativePath=".\tsubCodes.c"
+				RelativePath=".\tSubCodes.c"
 				>
 			</File>
 			<File
@@ -167,7 +165,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tsubReader.c"
+				RelativePath=".\tSubReader.c"
 				>
 			</File>
 		</Filter>
@@ -177,27 +175,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\NullGrabberIIDs\NullGrabber_h.h"
-				>
-			</File>
-			<File
-				RelativePath=".\tSubCaption.h"
-				>
-			</File>
-			<File
 				RelativePath=".\tSubGetLib.h"
 				>
 			</File>
 			<File
-				RelativePath=".\tSubParser.h"
-				>
-			</File>
-			<File
-				RelativePath=".\tSubReader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\tSubVersion.h"
+				RelativePath=".\tSubInternal.h"
 				>
 			</File>
 		</Filter>

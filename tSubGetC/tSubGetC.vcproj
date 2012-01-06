@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="tSubGetC"
-	ProjectGUID="{4262939D-19CF-4086-AFAB-9BC2271EC4C3}"
+	ProjectGUID="{5C27C4E2-8655-4F81-A81C-E56F46CFF0C8}"
 	RootNamespace="tSubGetC"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -60,8 +60,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;..\Bin\Debug\tSubGetLib.lib&quot;"
 				LinkIncremental="2"
+				AdditionalManifestDependencies="type=&apos;win32&apos;  name=&apos;NullGrabber&apos; version=&apos;0.8.5.0&apos; processorArchitecture=&apos;X86&apos;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -133,8 +133,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;..\Bin\tSubGetLib.lib&quot;"
 				LinkIncremental="1"
+				AdditionalManifestDependencies="type=&apos;win32&apos;  name=&apos;NullGrabber&apos; version=&apos;0.8.0.1&apos; processorArchitecture=&apos;X86&apos;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -186,16 +186,16 @@
 				RelativePath=".\tSubGetC.h"
 				>
 			</File>
-			<File
-				RelativePath="..\tSubGetLib\tSubGetLib.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\tSubGet.ico"
+				>
+			</File>
 			<File
 				RelativePath=".\tSubGetC.rc"
 				>

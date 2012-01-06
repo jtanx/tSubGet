@@ -1,0 +1,39 @@
+import "unknwn.idl";
+import "amstream.idl";
+
+[
+	object,
+	uuid(08478C61-D22B-416b-93B5-3379CC027A79),
+	helpstring("INullGrabberCB is the interface definition for the Null Grabber callback function.")
+]
+interface INullGrabberCB : IUnknown
+{
+	HRESULT SampleCB([in] IMediaSample *pSample, [in] REFERENCE_TIME *StartTime, [in] REFERENCE_TIME *EndTime);
+};
+
+[
+	object,
+	uuid(96287A17-9D0A-4bcc-AD30-1E44A0ABE9D1),
+	helpstring("INullGrabber interface controls the behaviour of the Null Grabber Renderer filter.")
+]
+interface INullGrabber : IUnknown
+{
+	HRESULT SetAcceptedMediaType([in] const AM_MEDIA_TYPE *pType);
+	HRESULT GetConnectedMediaType([out] AM_MEDIA_TYPE *pType);
+	HRESULT SetCallback([in] INullGrabberCB *Callback);
+};
+
+[
+	uuid(ed0469e0-171f-11e1-bddb-0800200c9a66),
+	helpstring("INullGrabber library.")
+]
+library NullGrabberLib
+{
+	[
+		uuid(3CFFEB81-A06E-4e1d-AFAB-9E6AF667D087),
+		helpstring("NullGrabber class")
+	]
+	coclass NullGrabber{
+		[default] interface INullGrabber;
+	};
+};

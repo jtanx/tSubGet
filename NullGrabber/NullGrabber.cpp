@@ -2,6 +2,12 @@
 #include <initguid.h>
 #include "NullGrabber.h"
 
+CNullGrabber::CNullGrabber(LPUNKNOWN pUnk, HRESULT *phr):
+CBaseRenderer(CLSID_NullGrabber, NAME("Null Grabber"), pUnk, phr){
+	m_callback = NULL;
+	m_mtAccept = CMediaType();
+}
+
 CUnknown * WINAPI CNullGrabber::CreateInstance(LPUNKNOWN punk, HRESULT *phr) 
 {
     ASSERT(phr);
@@ -13,55 +19,6 @@ CUnknown * WINAPI CNullGrabber::CreateInstance(LPUNKNOWN punk, HRESULT *phr)
     return pNewObject;   
 
 } 
-
-CNullGrabber::CNullGrabber(LPUNKNOWN pUnk, HRESULT *phr):
-CBaseRenderer(CLSID_NullGrabber, NAME("Null Grabber"), pUnk, phr){
-	m_callback = NULL;
-	m_mtAccept = CMediaType();
-}
-
-STDMETHODIMP CNullGrabber::NonDelegatingQueryInterface(REFIID riid, void ** ppv) 
-{
-    CheckPointer(ppv,E_POINTER);
-	
-    if(riid == IID_INullGrabber) {                
-        return GetInterface((INullGrabber *) this, ppv);
-    }
-    else {
-        return CBaseRenderer::NonDelegatingQueryInterface(riid, ppv);
-    }
-}
-
-STDMETHODIMP CNullGrabber::SetAcceptedMediaType(const CMediaType *pmt)
-{
-	HRESULT hr;
-	CAutoLock lock( &m_Lock );
-
-	if(!pmt){
-		m_mtAccept = CMediaType();
-		return S_OK;
-	}
-
-	hr = CopyMediaType(&m_mtAccept, pmt);
-	return hr;	
-}
-
-STDMETHODIMP CNullGrabber::GetConnectedMediaType(CMediaType *pmt)
-{
-	if(!m_pInputPin || !m_pInputPin->IsConnected()){
-		return VFW_E_NOT_CONNECTED;
-	}
-
-	return m_pInputPin->ConnectionMediaType(pmt);
-}
-
-STDMETHODIMP CNullGrabber::SetCallback(NGCALLBACK Callback )
-{
-    CAutoLock lock( &m_Lock );
-
-    m_callback = Callback;
-    return S_OK;
-}
 
 HRESULT CNullGrabber::CheckMediaType(const CMediaType *pmt){
 	GUID checkGUID;
@@ -101,8 +58,72 @@ HRESULT CNullGrabber::DoRenderSample(IMediaSample *pMediaSample){
 		pMediaSample->GetTime(&StartTime, &StopTime);
 		StartTime += m_pInputPin->CurrentStartTime();
 		StopTime  += m_pInputPin->CurrentStartTime();
-		hr = m_callback( pMediaSample, &StartTime, &StopTime);
+		hr = m_callback->SampleCB(pMediaSample, &StartTime, &StopTime);
 	}
 
 	return hr;
+}
+
+STDMETHODIMP CNullGrabber::QueryInterface(REFIID riid, __deref_out void **ppv){
+	HRESULT hr = GetOwner()->QueryInterface(riid,ppv);
+	if (SUCCEEDED(hr) && m_callback)
+		m_callback->AddRef();
+
+	return hr;
+}
+STDMETHODIMP_(ULONG) CNullGrabber::AddRef(){
+	if (m_callback)
+		m_callback->AddRef();
+	return GetOwner()->AddRef();
+}
+STDMETHODIMP_(ULONG) CNullGrabber::Release(){
+	if (m_callback)
+		m_callback->Release();
+	return GetOwner()->Release();
+}
+
+STDMETHODIMP CNullGrabber::NonDelegatingQueryInterface(REFIID riid, void ** ppv) 
+{
+	CheckPointer(ppv,E_POINTER);
+	
+	if(riid == IID_INullGrabber) {
+        return GetInterface((INullGrabber *) this, ppv);
+    }
+    else {
+        return CBaseRenderer::NonDelegatingQueryInterface(riid, ppv);
+    }
+}
+
+STDMETHODIMP CNullGrabber::SetAcceptedMediaType(const CMediaType *pmt)
+{
+	HRESULT hr;
+	CAutoLock lock( &m_Lock );
+
+	if(!pmt){
+		m_mtAccept = CMediaType();
+		return S_OK;
+	}
+
+	hr = CopyMediaType(&m_mtAccept, pmt);
+	return hr;	
+}
+
+STDMETHODIMP CNullGrabber::GetConnectedMediaType(CMediaType *pmt)
+{
+	if(!m_pInputPin || !m_pInputPin->IsConnected()){
+		return VFW_E_NOT_CONNECTED;
+	}
+
+	return m_pInputPin->ConnectionMediaType(pmt);
+}
+
+STDMETHODIMP CNullGrabber::SetCallback(INullGrabberCB *Callback )
+{
+	CAutoLock lock( &m_Lock );
+
+	if (Callback){
+		m_callback = Callback;
+		m_callback->AddRef();
+	}
+	return S_OK;
 }

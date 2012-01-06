@@ -1,0 +1,5 @@
+#ifdef _DEBUG
+1 TYPELIB "Debug\\NullGrabber.tlb"
+#else
+1 TYPELIB "Release\\NullGrabber.tlb"
+#endif

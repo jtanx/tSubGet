@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="NullGrabber"
-	ProjectGUID="{04FB05C4-B456-4D10-A20D-866EB2608F03}"
+	ProjectGUID="{6AD1881F-392A-4DC7-B587-5F8FD372E851}"
 	RootNamespace="NullGrabber"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -55,6 +55,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_UNICODE;UNICODE;_DEBUG"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -63,6 +64,8 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib &quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses\Debug\strmbasd.lib&quot;"
 				LinkIncremental="2"
+				EnableUAC="false"
+				ModuleDefinitionFile="NullGrabber.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -72,6 +75,9 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32"
+				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
+				ComponentFileName="NullGrabber.dll"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -137,6 +143,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib &quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses\Release\strmbase.lib&quot;"
 				LinkIncremental="1"
+				EnableUAC="false"
 				ModuleDefinitionFile="NullGrabber.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -149,6 +156,9 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.0.1, type=win32"
+				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
+				ComponentFileName="NullGrabber.dll"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -184,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NullGrabber.idl"
+				>
+			</File>
+			<File
 				RelativePath=".\NullGrabberInits.cpp"
 				>
 			</File>
@@ -197,12 +211,20 @@
 				RelativePath=".\NullGrabber.h"
 				>
 			</File>
+			<File
+				RelativePath=".\NullGrabberInterfaces.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\NullGrabber.rc"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

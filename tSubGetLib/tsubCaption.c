@@ -1,38 +1,113 @@
-#include "tSubCaption.h"
-static int capDuplicate(CaptionCluster *cc, ArrayInfo *ccI);
-static int appendSpace(CaptionCluster *cc, ArrayInfo *ccI);
-static void convertMsToRTime(__int64 ms, RTime *rt);
-static const wchar_t *colours[8] = {L"black",L"red",L"green",L"yellow",
-									L"blue",L"magenta",L"cyan",L"white"};
+#include "tSubInternal.h"
+static int ccIsDuplicate(CaptionCluster *ccA, CaptionCluster *ccB);
+static int capDuplicate(CaptionCluster *cc);
 
-int capAdd(CaptionCluster *cc, ArrayInfo *ccI, unsigned posX, unsigned posY, unsigned lang, unsigned char val){
+int ccStart(Queue ccq, __int64 timeStart){
+	CaptionCluster *cc;
+	if (!qbAdd(ccq, FALSE, &cc))
+		return PARSER_E_MEM;
+	else if (!(cc->caps = qbCreate(sizeof(Caption))))
+		return PARSER_E_MEM;
+
+	cc->timeStart = timeStart/10000;
+	return PARSER_OK;
+}
+
+void ccEnd(Queue ccq, __int64 timeEnd){
+	CaptionCluster *ccCurrent, *ccPrev;
+	Caption *c;
+
+	if (!qbPeek(ccq, 0, FALSE, &ccCurrent))
+		return;
+	capEnd(ccCurrent);
+
+	//Condition 1: No caps in cluster. Condition 2: Duplicate cluster.
+	qbPeek(ccCurrent->caps, 0, TRUE, &c);
+	qbPeek(ccq, 1, FALSE, &ccPrev);
+	if (!c || (ccPrev && ccIsDuplicate(ccPrev, ccCurrent))){
+		while (qbPeek(ccCurrent->caps, 0, TRUE, &c)){
+			sbFree(c->text);
+			qbFreeSingle(ccCurrent->caps, TRUE);
+		}
+
+		qbClose(&ccCurrent->caps);
+		qbFreeSingle(ccq, FALSE);
+		ccCurrent = ccPrev;
+		if (!ccPrev) return; //Happens in condition 1 with no previous cap.
+	}
+	
+	timeEnd /= 10000;
+	if (ccCurrent->timeStart > timeEnd || ccCurrent->timeStart < 0)
+		ccCurrent->timeStart = 0;
+	ccCurrent->timeEnd = timeEnd;
+}
+
+int capStart(CaptionCluster *cc){
+	if (!cc->hasActiveCap){
+		Caption *c;
+		if (!qbAdd(cc->caps, FALSE, &c))
+			return PARSER_E_MEM;
+		if (!(c->text = sbCreate(TT_PACKETSIZE, -1)))
+			return PARSER_E_MEM;
+
+		c->fgColour = WHITE;
+		cc->hasActiveCap = TRUE;
+	}
+	return PARSER_OK;
+}
+
+void capEnd(CaptionCluster *cc){
+	if (cc->hasActiveCap){
+		Caption *currentCap, *previousCap;
+		
+		if (!qbPeek(cc->caps, 0, FALSE, &currentCap))
+			return;
+		qbPeek(cc->caps, 1, FALSE, &previousCap);
+		
+		if (sbGetCharCount(currentCap->text) == 0){
+			sbFree(currentCap->text);
+			qbFreeSingle(cc->caps, FALSE);
+		} else if (previousCap && currentCap->posY == previousCap->posY)
+			previousCap->noBreak = TRUE;
+		
+		cc->hasActiveCap = FALSE;
+	}
+}
+
+int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 	int ret;
+	CaptionCluster *cc;
 	Caption *currentCap;
 
-	if (!cc || !ccI || ccI->index == ccI->count)
+	if (!p || !qbPeek(p->cc, 0, FALSE, &cc))
 		return PARSER_E_PARAMS;
-	ret = capStart(cc,ccI); 
-	if (ret != PARSER_OK)
+	else if ((ret = capStart(cc)) != PARSER_OK)
 		return ret;
+	else if (!qbPeek(cc->caps, 0, FALSE, &currentCap))
+		return PARSER_E_MEM;
 
-	currentCap = &cc[ccI->index].caps[cc[ccI->index].capsI.index];
+	//Control flags
 	if (val >= 0 && val <= 0x1F){
-		if (val == 0x0B)//Start flag
+		if (val == 0x0B){//Start flag
 			currentCap->startFlag = TRUE;
-		else if (val == 0x0A) //End flag
-			capEnd(cc,ccI);
+			currentCap->posX = posX;
+			currentCap->posY = posY;
+		} else if (val == 0x0A) //End flag
+			capEnd(cc);
 		else{
-			if (currentCap->startFlag && currentCap->textI.index > 0){
-				ret = appendSpace(cc,ccI);
-				if (ret != PARSER_OK)
-					return ret;
+			if (currentCap->startFlag && sbGetCharCount(currentCap->text) > 0){
+				if (!sbAddChar(currentCap->text, L' '))
+					return PARSER_E_MEM;
 
-				capEnd(cc,ccI);
-				ret = capDuplicate(cc,ccI);
-				if (ret != PARSER_OK)
+				if ((ret = capDuplicate(cc)) != PARSER_OK)
 					return ret;
-				currentCap = &cc[ccI->index].caps[cc[ccI->index].capsI.index];
+				else if (!qbPeek(cc->caps, 0, FALSE, &currentCap))
+					return PARSER_E_MEM;
+				
+				currentCap->posX = posX;
+				currentCap->posY = posY;
 			}
+
 			if (val >= 0 && val <= 0x7)
 				currentCap->fgColour = val;
 			else 
@@ -51,17 +126,8 @@ int capAdd(CaptionCluster *cc, ArrayInfo *ccI, unsigned posX, unsigned posY, uns
 					case 0x1D: currentCap->bgColour = currentCap->fgColour; break;
 				}
 		}
-		currentCap->posX = posX;
-		currentCap->posY = posY;
 	} else if (currentCap->startFlag){
 		wchar_t parsedVal;
-
-		if (currentCap->textI.index == currentCap->textI.count-1){
-			currentCap->textI.count += CAPTION_TEXT_SIZE;
-			currentCap->text = realloc(currentCap->text,sizeof(wchar_t)*currentCap->textI.count);
-			if (!currentCap->text)
-				return PARSER_E_MEM;
-		}
 
 		switch (val){
 			case 0x23: case 0x24:
@@ -77,51 +143,43 @@ int capAdd(CaptionCluster *cc, ArrayInfo *ccI, unsigned posX, unsigned posY, uns
 			default:
 				parsedVal = (wchar_t)val;
 		}
-		currentCap->text[currentCap->textI.index++] = parsedVal;
+		if (!sbAddChar(currentCap->text, parsedVal))
+			return PARSER_E_MEM;
 	}
-
-	return PARSER_OK;
-}
-
-int ccSingleWriteOut(CaptionCluster *cc, unsigned index, unsigned colouredOutput, __int64 delay, FILE *fp){
-	RTime timeStart, timeEnd;
-	unsigned i;
-	if (!cc || !fp)
-		return PARSER_E_PARAMS;
-	
-	convertMsToRTime(cc[index].timeStart+delay,&timeStart);
-	convertMsToRTime(cc[index].timeEnd+delay,&timeEnd);
-	
-	fwprintf(fp,L"%d\n",index+1);
-	fwprintf(fp,L"%.2lld:%.2lld:%.2lld,%.3lld --> %.2lld:%.2lld:%.2lld,%.3lld\n",
-				timeStart.h,timeStart.m,timeStart.s,timeStart.ms,
-				timeEnd.h,timeEnd.m,timeEnd.s,timeEnd.ms);
-	for (i = 0; i < cc[index].capsI.index; i++){
-		if (colouredOutput && cc[index].caps[i].fgColour != WHITE)
-			fwprintf(fp,L"<font color=\"%s\">",colours[cc[index].caps[i].fgColour]);
-		fwprintf(fp,L"%s",cc[index].caps[i].text);
-		if (colouredOutput && cc[index].caps[i].fgColour != WHITE)
-			fwprintf(fp,L"</font>");
-		if (!cc[index].caps[i].noBreak || i == cc[index].capsI.index-1)
-			fwprintf(fp,L"\n");
-	}
-	fwprintf(fp,L"\n");
 
 	return PARSER_OK;
 }
 
 /////////////////////////////BEGIN HELPER ROUTINES/////////////////////////////
-static int capDuplicate(CaptionCluster *cc, ArrayInfo *ccI){
+
+static int ccIsDuplicate(CaptionCluster *ccA, CaptionCluster *ccB){
+	Caption *cA = NULL, *cB = NULL;
+	int i = 0;
+
+	//Both must be evaluated (NOT &&)
+	while(qbPeek(ccA->caps, i, FALSE, &cA) & qbPeek(ccB->caps, i, FALSE, &cB)){
+		if (wcscmp(sbGetString(cA->text), sbGetString(cB->text)))
+			return FALSE;
+		i++;
+	}
+
+	//One has more caps than the other.
+	if (cA || cB)
+		return FALSE;
+	return TRUE;
+}
+
+static int capDuplicate(CaptionCluster *cc){
 	int ret;
 	Caption *previous, *current;
 
-	if (cc[ccI->index].hasActiveCap || cc[ccI->index].capsI.index <= 0)
+	if (!qbPeek(cc->caps, 0, FALSE, &previous))
 		return PARSER_E_PARAMS;
-	ret = capStart(cc,ccI);
-	if (ret != PARSER_OK)
+	
+	capEnd(cc);
+	ret = capStart(cc);
+	if (ret != PARSER_OK || !qbPeek(cc->caps, 0, FALSE, &current))
 		return ret;
-	previous = &cc[ccI->index].caps[cc[ccI->index].capsI.index-1];
-	current = &cc[ccI->index].caps[cc[ccI->index].capsI.index];
 	
 	current->bgColour = previous->bgColour;
 	current->fgColour = previous->fgColour;
@@ -132,28 +190,5 @@ static int capDuplicate(CaptionCluster *cc, ArrayInfo *ccI){
 	return PARSER_OK;
 }
 
-static int appendSpace(CaptionCluster *cc, ArrayInfo *ccI){
-	Caption *currentCap = &cc[ccI->index].caps[cc[ccI->index].capsI.index];
-	
-	if (currentCap->textI.index > 0){
-		if (currentCap->text[currentCap->textI.index-1] != L' '){
-			if (currentCap->textI.index == currentCap->textI.count){
-				currentCap->textI.count += CAPTION_TEXT_SIZE;
-				currentCap->text = realloc(currentCap->text,sizeof(wchar_t)*currentCap->textI.count);
-				if (!currentCap->text)
-					return PARSER_E_MEM;
-			}
-			currentCap->text[currentCap->textI.index++] = L' ';
-		}
-	}
-	return PARSER_OK;
-}
 
-static void convertMsToRTime(__int64 ms, RTime *rt){
-	if (ms < 0) ms = 0;
-	rt->h = ms/3600000;
-	rt->m = (ms%3600000)/60000;
-	rt->s = (ms%60000)/1000;
-	rt->ms = ms%1000;
-}
 /////////////////////////////END HELPER ROUTINES/////////////////////////////

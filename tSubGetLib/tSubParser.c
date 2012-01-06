@@ -1,111 +1,142 @@
-#include "tSubParser.h"
+#include "tSubInternal.h"
+
+static int fileExists(wchar_t *file);
 static int parsePage(CaptionsParser *p, Sample smp);
 static void getDefaultOutputFile(wchar_t *inBuf, wchar_t *outBuf, int bufSize);
+static void convertMsToRTime(__int64 ms, RTime *rt);
+static const wchar_t *colours[8] = {L"black",L"red",L"green",L"yellow",
+									L"blue",L"magenta",L"cyan",L"white"};
 
-int parserInit(CaptionsParser *p){
-	FILE *fp;
+int tsgInit(CaptionsParser **p, ParserOpts *po){
 	int ret;
 	
-	if (!p)
+	if (!p || !po || !fileExists(po->fileIn))
 		return PARSER_E_PARAMS;
-
-	//Check the input file exists
-	if (_wfopen_s(&fp,p->fileIn,L"r"))
-		return PARSER_E_FNF_IN;
-	fclose(fp);
-
-	//Check the output file doesn't exist
-	if (p->fileOut[0] == '\0')
-		getDefaultOutputFile(p->fileIn,p->fileOut,MAX_PATH);
-	if (!p->overwriteOutput && !_wfopen_s(&fp,p->fileOut,L"r")){
-		fclose(fp);
-		return PARSER_W_OUT_EXISTS;
-	}
+	else if (po->pageNumber > 0x7FF || po->langId != LANGID_DEFAULT)
+		return PARSER_E_PARAMS;
+	
+	//Determine the correct output filename and determine if it exists.
+	if (po->fileOut[0] == '\0')
+		getDefaultOutputFile(po->fileIn,po->fileOut,MAX_PATH);
+	if (!po->overwriteOutput && fileExists(po->fileOut))
+		return PARSER_E_OUT_EXISTS;
+	
+	//Allocate buffer for CaptionsParser, since everything seems ok.
+	*p = calloc(1, sizeof(CaptionsParser));
+	if (!p)
+		return PARSER_E_MEM;
+	(*p)->po = *po;
 
 	//Check that the input will 'work' or can be parsed
-	ret = readerInit(p);
-	if (ret != PARSER_OK)
+	ret = readerInit(*p);
+	if (ret != PARSER_OK){
+		tsgClose(p);
 		return ret;
+	}
 	
 	//Create the event signals
-	p->hAbort = CreateEvent(NULL,TRUE,FALSE,NULL);
-	if (!p->hAbort)
+	(*p)->hAbort = CreateEvent(NULL,TRUE,FALSE,NULL);
+	if (!(*p)->hAbort){
+		tsgClose(p);
 		return PARSER_E_COM;
+	}
 
 	//Initialise the caption-cluster structure
-	memset(&p->ccI,0,sizeof(ArrayInfo));
-	ret = ccInit(&p->cc,&p->ccI);
-	if (ret != PARSER_OK)
-		parserClose(p);
-	return ret;
-}
-
-int parseSample(CaptionsParser *p, Sample smp){
-	int i, ret;
-	unsigned char rawHeader[10];
-	unsigned packetNum, curPage;
-
-	if (smp.bufSize < TT_PAGESIZE)
-		return PARSER_OK; //Not fatal.
-	for (i = 0; i < 10; i++){
-		rawHeader[i] = fixHamm48[smp.pBuf[i]];
-		if (rawHeader[i] & 0x80) //Erroneous packet
-			return PARSER_OK;
+	(*p)->cc = qbCreate(sizeof(CaptionCluster));
+	if (!(*p)->cc){
+		tsgClose(p);
+		return PARSER_E_MEM;
 	}
-	
-	packetNum = rawHeader[1] | rawHeader[0] >> 3;
-	if (packetNum != 0) //Currently only support Pkt/0 types
-		return PARSER_OK;
-	curPage = ((rawHeader[0] & 0x7) << 8)|(rawHeader[3] << 4)|(rawHeader[2]);
-	if (curPage != p->pageNum)
-		return PARSER_OK;
-	ret = parsePage(p,smp);
-	
-	return ret;
-}
 
-int parserWriteout(CaptionsParser *p){
-	unsigned i, ret;
-	if (!p) return PARSER_E_PARAMS;
-	else if (p->ccI.index == 0) return PARSER_W_NOCAPS;
-
-	if (_wfopen_s(&p->fpOut,p->fileOut,L"w"))
-		return PARSER_E_OUT_DENIED;	
-
-	for (i = 0; i < p->ccI.index; i++){
-		ret = ccSingleWriteOut(p->cc,i,p->colouredOutput,p->delay,p->fpOut);
-		if (ret != PARSER_OK)
-			return ret;
-	}
 	return PARSER_OK;
 }
 
-void parserClose(CaptionsParser *p){
-	if (p){
-		if (p->fpOut){
-			fclose(p->fpOut);
-			p->fpOut = NULL;
+int tsgWriteout(CaptionsParser *p){
+	FILE *fp;
+	unsigned i;
+	CaptionCluster *cc;
+	Caption *cap;
+	RTime timeStart, timeEnd;
+
+	if (!p) 
+		return PARSER_E_PARAMS;
+	else  if (!qbPeek(p->cc, 0, TRUE, &cc) || !cc)
+		return PARSER_E_NOCAPS;
+	else if (_wfopen_s(&fp, p->po.fileOut, L"w"))
+		return PARSER_E_OUT_DENIED;
+
+	for (i = 0; cc; i++){
+		convertMsToRTime(cc->timeStart, &timeStart);
+		convertMsToRTime(cc->timeEnd, &timeEnd);
+		fwprintf(fp, L"%d\n", i+1);
+		fwprintf(fp,L"%.2lld:%.2lld:%.2lld,%.3lld --> %.2lld:%.2lld:%.2lld,%.3lld\n",
+				timeStart.h,timeStart.m,timeStart.s,timeStart.ms,
+				timeEnd.h,timeEnd.m,timeEnd.s,timeEnd.ms);
+		
+		while (qbPeek(cc->caps, 0, TRUE, &cap) && cap){
+			if (p->po.addColourTags && cap->fgColour != WHITE)
+				fwprintf(fp, L"<font color=\"%s\">", colours[cap->fgColour]);
+			fwprintf(fp, L"%s", sbGetString(cap->text));
+			if (p->po.addColourTags && cap->fgColour != WHITE)
+				fwprintf(fp, L"</font>");
+			if (!cap->noBreak || !qbPeek(cc->caps, 0, TRUE, NULL))
+				fwprintf(fp, L"\n");
+			
+			sbFree(cap->text);
+			if (!qbFreeSingle(cc->caps, TRUE))
+				return PARSER_E_MEM;
 		}
-		readerClose(p);
-		ccClose(p->cc,p->ccI);
-		CloseHandle(p->hAbort);
+		fwprintf (fp, L"\n");
+		qbClose(&cc->caps);
+		
+		if (!qbFreeSingle(p->cc, TRUE))
+			return PARSER_E_MEM;
+		qbPeek(p->cc, 0, TRUE, &cc);
 	}
+
+	fclose(fp);
+	return PARSER_OK;
 }
 
-void parserSignalAbort(CaptionsParser *p){
+void tsgClose(CaptionsParser **p){
+	if (*p){
+		CaptionCluster *cc;
+
+		readerClose(*p);
+		while (qbPeek((*p)->cc, 0, TRUE, &cc)){
+			Caption *c;
+			if (!cc) break;
+			
+			while (qbPeek(cc->caps, 0, TRUE, &c)){
+				if (!c) break;
+				sbFree(c->text);
+				qbFreeSingle(cc->caps, TRUE);
+			}
+			qbClose(&cc->caps);
+			qbFreeSingle((*p)->cc, TRUE);
+		}
+		qbClose(&(*p)->cc);
+
+		CloseHandle((*p)->hAbort);
+	}
+	free(*p);
+	*p = NULL;
+}
+
+void tsgSignalAbort(CaptionsParser *p){
 	SetEvent(p->hAbort);
 }
 
-void parserGetError(int errCode, wchar_t *buf, int bufSize){
+void tsgGetError(int errCode, wchar_t *buf, int bufSize){
 	wchar_t *ptr;
 
 	if (!buf) return;
 	switch (errCode){
 		case PARSER_OK:
 			ptr = L"No error"; break;
-		case PARSER_W_NOCAPS:
+		case PARSER_E_NOCAPS:
 			ptr = L"No subtitles detected"; break;
-		case PARSER_W_OUT_EXISTS:
+		case PARSER_E_OUT_EXISTS:
 			ptr = L"The output file exists"; break;
 		case PARSER_E_PARAMS:
 			ptr = L"An invalid parameter was passed"; break;
@@ -127,22 +158,56 @@ void parserGetError(int errCode, wchar_t *buf, int bufSize){
 
 	wcsncpy_s(buf,bufSize,ptr,_TRUNCATE);
 }
+
+int parseSample(CaptionsParser *p, Sample smp){
+	int i, ret;
+	unsigned char rawHeader[10];
+	unsigned packetNum, curPage;
+
+	if (smp.bufSize < TT_PAGESIZE)
+		return PARSER_OK; //Not fatal.
+	for (i = 0; i < 10; i++){
+		rawHeader[i] = fixHamm48[smp.pBuf[i]];
+		if (rawHeader[i] & 0x80) //Erroneous packet
+			return PARSER_OK;
+	}
+	
+	packetNum = rawHeader[1] | rawHeader[0] >> 3;
+	curPage = ((rawHeader[0] & 0x7) << 8)|(rawHeader[3] << 4)|(rawHeader[2]);
+	if (packetNum != 0 || curPage != p->po.pageNumber)
+		return PARSER_OK;
+
+	ret = parsePage(p,smp);
+	return ret;
+}
+
 /////////////////////////////BEGIN HELPER ROUTINES/////////////////////////////
+
+static int fileExists(wchar_t *file){
+	FILE *fp;
+	if (!_wfopen_s(&fp, file, L"r")){
+		fclose(fp);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 static int parsePage(CaptionsParser *p, Sample smp){
 	int i, j, ret;
 	int bufPos = TT_PACKETSIZE;
 
-	ccEnd(p->cc,&p->ccI,smp.time);
-	ccStart(&p->cc,&p->ccI,smp.time);
+	ccEnd(p->cc, smp.time);
+	ccStart(p->cc, smp.time);
+	
 	for (i = 0; i < TT_PACKETSPP - 1; i++, bufPos += TT_PACKETSIZE){
 		unsigned char mag = fixHamm48[smp.pBuf[bufPos]] & 0x7;
-		if (mag & 0x80 || mag != p->pageNum >> 8) continue;
+		if (mag & 0x80 || mag != p->po.pageNumber >> 8) continue;
 		
 		for (j = 2; j < TT_PACKETSIZE; j++){
 			unsigned char val = fixParity[smp.pBuf[bufPos+j]];
 			if (val & 0x80) continue;
 
-			ret = capAdd(p->cc,&p->ccI,j,i,0,val);
+			ret = capAdd(p, j, i, val);
 			if (ret != PARSER_OK)
 				return ret;
 		}
@@ -157,5 +222,13 @@ static void getDefaultOutputFile(wchar_t *inBuf, wchar_t *outBuf, int bufSize){
 	ptr = wcsrchr(outBuf,L'.');
 	if (ptr) *ptr = L'\0';
 	wcsncat_s(outBuf,bufSize,EXT,_TRUNCATE);
+}
+
+static void convertMsToRTime(__int64 ms, RTime *rt){
+	if (ms < 0) ms = 0;
+	rt->h = ms/3600000;
+	rt->m = (ms%3600000)/60000;
+	rt->s = (ms%60000)/1000;
+	rt->ms = ms%1000;
 }
 /////////////////////////////END HELPER ROUTINES/////////////////////////////
