@@ -3,6 +3,9 @@
 #include "tSubInternal.h"
 #define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
 
+/* QueryInterface, AddRef and Release are all function stubs used to
+   implement INullGrabberCB (pseudo-COM interface)
+*/
 HRESULT STDMETHODCALLTYPE QueryInterface(INullGrabberCB *this, REFIID riid, void **ppvObject){
 	return E_NOINTERFACE;
 }
@@ -15,6 +18,12 @@ HRESULT STDMETHODCALLTYPE Release(INullGrabberCB *this){
 	return 1;
 }
 
+/*
+   SampleCB(this, pSample, StartTime, EndTime) is the main callback
+   function for samples received from the Null Grabber. Generally
+   speaking, EndTime is of no use. It is at this point in which
+   the abort condition is checked and executed.
+*/
 HRESULT STDMETHODCALLTYPE SampleCB(INullGrabberCB *this, IMediaSample *pSample, REFERENCE_TIME *StartTime, REFERENCE_TIME *EndTime){
 	CaptionsParser *p = ((NGCallback*) this)->pParent;
 
@@ -45,6 +54,11 @@ static const INullGrabberCBVtbl INullGrabberCB_Vtbl = {
 	SampleCB
 };
 
+/*
+   ngCallbackinit(p) 'initialises' INullGrabberCB/NGCallback
+   with the required settings, and enables the callback function
+   SampleCB to work.
+*/
 void ngCallbackInit(CaptionsParser *p){
 	p->fr.NullGrabberCB.lpVtbl = &INullGrabberCB_Vtbl;
 	p->fr.NullGrabberCB.pParent = p;

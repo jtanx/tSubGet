@@ -65,10 +65,8 @@ int WINAPI workerThread(void *args){
 
 	CoInitialize(NULL);
 	ret = tsgProcess(p);
-	if (ret != PARSER_OK) return ret;
-	ret = tsgWriteout(p);
-	if (ret != PARSER_OK) return ret;
-	tsgClose(&p);
+	if (ret == PARSER_OK)
+		ret = tsgWriteout(p);
 	CoUninitialize();
 
 	return ret;
@@ -153,6 +151,8 @@ int wmain(int argc, wchar_t *argv[]){
 		Sleep(100);
 	} while (workerExitCode == STILL_ACTIVE);
 	
+	tsgClose(&p);
+
 	if (workerExitCode != PARSER_OK){
 		tsgGetError(workerExitCode,textBuf,BUFSIZ);
 		wprintf (L"Error: The parser returned the following:\n");

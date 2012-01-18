@@ -1,7 +1,13 @@
 #include "tSubInternal.h"
+static int capStart(CaptionCluster *cc);
+static void capEnd(CaptionCluster *cc);
 static int ccIsDuplicate(CaptionCluster *ccA, CaptionCluster *ccB);
 static int capDuplicate(CaptionCluster *cc);
 
+/*
+   ccStart(ccq, timeStart) initialises a new caption cluster
+   with the given starting timestamp.
+*/
 int ccStart(Queue ccq, __int64 timeStart){
 	CaptionCluster *cc;
 	if (!qbAdd(ccq, FALSE, &cc))
@@ -13,6 +19,17 @@ int ccStart(Queue ccq, __int64 timeStart){
 	return PARSER_OK;
 }
 
+/*
+   ccEnd(ccq, timeEnd) finalises a caption cluster, checking for
+   and removing duplicate or empty clusters. Faulty timestamps
+   can occur (due to corruption in the recorded stream), so nonzero
+   timestamps are set to zero, and if the end time is detected to occur
+   before the start time, the start time is also initialised to zero.
+
+   ccEnd will always alter the end time of the last caption cluster present,
+   working on the principle of displaying a cluster until the next cluster
+   appears.
+*/
 void ccEnd(Queue ccq, __int64 timeEnd){
 	CaptionCluster *ccCurrent, *ccPrev;
 	Caption *c;
@@ -36,44 +53,24 @@ void ccEnd(Queue ccq, __int64 timeEnd){
 		if (!ccPrev) return; //Happens in condition 1 with no previous cap.
 	}
 	
+	if (timeEnd < 0)
+		timeEnd = 0;
 	timeEnd /= 10000;
+
 	if (ccCurrent->timeStart > timeEnd || ccCurrent->timeStart < 0)
 		ccCurrent->timeStart = 0;
 	ccCurrent->timeEnd = timeEnd;
 }
 
-int capStart(CaptionCluster *cc){
-	if (!cc->hasActiveCap){
-		Caption *c;
-		if (!qbAdd(cc->caps, FALSE, &c))
-			return PARSER_E_MEM;
-		if (!(c->text = sbCreate(TT_PACKETSIZE, -1)))
-			return PARSER_E_MEM;
+/*
+   capAdd(p, posX, posY, val) parses the given value 'val',
+   and based on this new information, either a new caption
+   is created for the current caption cluster, or an existing
+   caption is modified.
 
-		c->fgColour = WHITE;
-		cc->hasActiveCap = TRUE;
-	}
-	return PARSER_OK;
-}
-
-void capEnd(CaptionCluster *cc){
-	if (cc->hasActiveCap){
-		Caption *currentCap, *previousCap;
-		
-		if (!qbPeek(cc->caps, 0, FALSE, &currentCap))
-			return;
-		qbPeek(cc->caps, 1, FALSE, &previousCap);
-		
-		if (sbGetCharCount(currentCap->text) == 0){
-			sbFree(currentCap->text);
-			qbFreeSingle(cc->caps, FALSE);
-		} else if (previousCap && currentCap->posY == previousCap->posY)
-			previousCap->noBreak = TRUE;
-		
-		cc->hasActiveCap = FALSE;
-	}
-}
-
+   Such information can include details on the presentation
+   aspects of each caption, or simply the caption text itself.
+*/
 int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 	int ret;
 	CaptionCluster *cc;
@@ -151,7 +148,57 @@ int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 }
 
 /////////////////////////////BEGIN HELPER ROUTINES/////////////////////////////
+/*
+   capStart(cc) appends a new caption (initialised to default
+   settings) to the current caption cluster, if there is none 
+   currently active.
+*/
+static int capStart(CaptionCluster *cc){
+	if (!cc->hasActiveCap){
+		Caption *c;
+		if (!qbAdd(cc->caps, FALSE, &c))
+			return PARSER_E_MEM;
+		if (!(c->text = sbCreate(TT_PACKETSIZE, -1)))
+			return PARSER_E_MEM;
 
+		c->fgColour = WHITE;
+		cc->hasActiveCap = TRUE;
+	}
+	return PARSER_OK;
+}
+
+/*
+   capEnd(cc) finalises an active caption (if present),
+   checking for, and removing captions containing no text.
+   
+   If the previous and current caption are meant to be
+   displayed on the same line, then this is signaled with
+   the 'noBreak' flag.
+*/
+static void capEnd(CaptionCluster *cc){
+	if (cc->hasActiveCap){
+		Caption *currentCap, *previousCap;
+		
+		if (!qbPeek(cc->caps, 0, FALSE, &currentCap))
+			return;
+		qbPeek(cc->caps, 1, FALSE, &previousCap);
+		
+		if (sbGetCharCount(currentCap->text) == 0){
+			sbFree(currentCap->text);
+			qbFreeSingle(cc->caps, FALSE);
+		} else if (previousCap && currentCap->posY == previousCap->posY)
+			previousCap->noBreak = TRUE;
+		
+		cc->hasActiveCap = FALSE;
+	}
+}
+
+/*
+   ccIsDuplicate(ccA, ccB) determines if two caption clusters,
+   ccA and ccB, are identical, in terms of text contained within
+   each. No comparison is made against the display style of each
+   caption.
+*/
 static int ccIsDuplicate(CaptionCluster *ccA, CaptionCluster *ccB){
 	Caption *cA = NULL, *cB = NULL;
 	int i = 0;
@@ -169,6 +216,15 @@ static int ccIsDuplicate(CaptionCluster *ccA, CaptionCluster *ccB){
 	return TRUE;
 }
 
+/*
+   capDuplicate(cc) finalises any active caption in the current
+   caption cluster, and creates a new one with the same attributes
+   as the previous one (the text and position attributes are not
+   duplicated, however).
+
+   Note that the caption cluster must possess at least one caption
+   for this function to work.
+*/
 static int capDuplicate(CaptionCluster *cc){
 	int ret;
 	Caption *previous, *current;
@@ -189,6 +245,5 @@ static int capDuplicate(CaptionCluster *cc){
 
 	return PARSER_OK;
 }
-
 
 /////////////////////////////END HELPER ROUTINES/////////////////////////////

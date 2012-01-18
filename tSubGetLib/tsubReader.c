@@ -35,7 +35,7 @@ int tsgProcess(CaptionsParser *p){
 }
 
 int tsgGetProgress(CaptionsParser *p){
-	if (p->fr.duration > 0)
+	if (p && p->fr.duration > 0)
 		return (int)(p->fr.currentPos*100/p->fr.duration);
 	return 0;
 }

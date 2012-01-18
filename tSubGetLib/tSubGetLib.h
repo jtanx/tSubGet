@@ -28,9 +28,12 @@ typedef enum LangID {
 typedef struct ParserOpts {
 	wchar_t fileIn[MAX_PATH];
 	wchar_t fileOut[MAX_PATH];
+	wchar_t folderOut[MAX_PATH];
+	unsigned colours[8];
 	LangID langId;
-	char addColourTags;
-	char overwriteOutput;
+	unsigned addColourTags;
+	unsigned customColours;
+	unsigned overwriteOutput;
 	unsigned pageNumber;	
 	__int64 delay;
 } ParserOpts;
@@ -44,6 +47,7 @@ void tsgSignalAbort(CaptionsParser *p);
 int tsgWriteout(CaptionsParser *p);
 void tsgClose(CaptionsParser **p);
 void tsgGetError(int errCode, wchar_t *buf, int bufSize);
+void tsgGetLangStr(LangID lang, wchar_t *outBuf, size_t bufSize);
 
 #endif
 

@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0500 */
-/* at Fri Jan 06 13:00:12 2012
+/* at Wed Jan 18 09:11:31 2012
  */
 /* Compiler settings for .\NullGrabber.idl:
     Oicf, W1, Zp8, env=Win32 (32b run)

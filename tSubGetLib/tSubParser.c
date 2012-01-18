@@ -1,14 +1,14 @@
 #include "tSubInternal.h"
-
-static int fileExists(wchar_t *file);
 static int parsePage(CaptionsParser *p, Sample smp);
-static void getDefaultOutputFile(wchar_t *inBuf, wchar_t *outBuf, int bufSize);
+static int fileExists(wchar_t *file);
+static void getDefaultOutputFile(ParserOpts *po);
 static void convertMsToRTime(__int64 ms, RTime *rt);
-static const wchar_t *colours[8] = {L"black",L"red",L"green",L"yellow",
-									L"blue",L"magenta",L"cyan",L"white"};
+
+static const unsigned colours[8] = {0x000000, 0xE00B0B, 0x54BA32, 0xE3EB50, 
+							        0x55A9ED, 0xE368DF, 0x7DDBF5, 0xFFFFFF};
 
 int tsgInit(CaptionsParser **p, ParserOpts *po){
-	int ret;
+	int ret, i;
 	
 	if (!p || !po || !fileExists(po->fileIn))
 		return PARSER_E_PARAMS;
@@ -17,9 +17,14 @@ int tsgInit(CaptionsParser **p, ParserOpts *po){
 	
 	//Determine the correct output filename and determine if it exists.
 	if (po->fileOut[0] == '\0')
-		getDefaultOutputFile(po->fileIn,po->fileOut,MAX_PATH);
+		getDefaultOutputFile(po);
 	if (!po->overwriteOutput && fileExists(po->fileOut))
 		return PARSER_E_OUT_EXISTS;
+
+	//Ensure custom colours are reasonable...
+	if (po->customColours)
+		for (i = 0; i < 8; i++)
+			po->colours[i] &= 0xFFFFFF;
 	
 	//Allocate buffer for CaptionsParser, since everything seems ok.
 	*p = calloc(1, sizeof(CaptionsParser));
@@ -75,7 +80,9 @@ int tsgWriteout(CaptionsParser *p){
 		
 		while (qbPeek(cc->caps, 0, TRUE, &cap) && cap){
 			if (p->po.addColourTags && cap->fgColour != WHITE)
-				fwprintf(fp, L"<font color=\"%s\">", colours[cap->fgColour]);
+				fwprintf(fp, L"<font color=\"#%.6x\">", 
+						 p->po.customColours ? p->po.colours[cap->fgColour] : 
+											   colours[cap->fgColour]);
 			fwprintf(fp, L"%s", sbGetString(cap->text));
 			if (p->po.addColourTags && cap->fgColour != WHITE)
 				fwprintf(fp, L"</font>");
@@ -105,10 +112,8 @@ void tsgClose(CaptionsParser **p){
 		readerClose(*p);
 		while (qbPeek((*p)->cc, 0, TRUE, &cc)){
 			Caption *c;
-			if (!cc) break;
 			
 			while (qbPeek(cc->caps, 0, TRUE, &c)){
-				if (!c) break;
 				sbFree(c->text);
 				qbFreeSingle(cc->caps, TRUE);
 			}
@@ -147,7 +152,7 @@ void tsgGetError(int errCode, wchar_t *buf, int bufSize){
 		case PARSER_E_OUT_DENIED:
 			ptr = L"The output file could not be opened for writing"; break;
 		case PARSER_E_MEM:
-			ptr = L"One of the memory allocation routines failed"; break;
+			ptr = L"A memory allocation routine failed"; break;
 		case PARSER_E_COM:
 			ptr = L"A COM error occurred"; break;
 		case PARSER_E_ABORT:
@@ -157,6 +162,20 @@ void tsgGetError(int errCode, wchar_t *buf, int bufSize){
 	}
 
 	wcsncpy_s(buf,bufSize,ptr,_TRUNCATE);
+}
+
+void tsgGetLangStr(LangID lang, wchar_t *buf, size_t bufSize){
+	wchar_t *ptr;
+	if (!buf) return;
+
+	switch (lang){
+		case LANGID_DEFAULT:
+			ptr = L"Latin/English"; break;
+		default:
+			ptr=  L"Unknown (!!)"; break;
+	}
+
+	wcsncpy_s(buf, bufSize, ptr, _TRUNCATE);
 }
 
 int parseSample(CaptionsParser *p, Sample smp){
@@ -182,16 +201,6 @@ int parseSample(CaptionsParser *p, Sample smp){
 }
 
 /////////////////////////////BEGIN HELPER ROUTINES/////////////////////////////
-
-static int fileExists(wchar_t *file){
-	FILE *fp;
-	if (!_wfopen_s(&fp, file, L"r")){
-		fclose(fp);
-		return TRUE;
-	}
-	return FALSE;
-}
-
 static int parsePage(CaptionsParser *p, Sample smp){
 	int i, j, ret;
 	int bufPos = TT_PACKETSIZE;
@@ -215,17 +224,32 @@ static int parsePage(CaptionsParser *p, Sample smp){
 	return PARSER_OK;
 }
 
-static void getDefaultOutputFile(wchar_t *inBuf, wchar_t *outBuf, int bufSize){
+static int fileExists(wchar_t *file){
+	FILE *fp;
+	if (!_wfopen_s(&fp, file, L"r")){
+		fclose(fp);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static void getDefaultOutputFile(ParserOpts *po){
 	wchar_t *ptr;
 
-	wcsncpy_s(outBuf,bufSize-EXT_SIZE,inBuf,_TRUNCATE);
-	ptr = wcsrchr(outBuf,L'.');
+	ptr = wcsrchr(po->fileIn, L'\\');
+	ptr = !ptr ? po->fileIn : ptr + 1;
+
+
+	if (po->folderOut[0] != L'\0')
+		_snwprintf_s(po->fileOut, MAX_PATH-EXT_SIZE, _TRUNCATE, L"%s\\%s", po->folderOut, ptr);
+	else
+		wcsncpy_s(po->fileOut, MAX_PATH-EXT_SIZE, po->fileIn, _TRUNCATE);
+	ptr = wcsrchr(po->fileOut,L'.');
 	if (ptr) *ptr = L'\0';
-	wcsncat_s(outBuf,bufSize,EXT,_TRUNCATE);
+	wcsncat_s(po->fileOut,MAX_PATH,EXT,_TRUNCATE);
 }
 
 static void convertMsToRTime(__int64 ms, RTime *rt){
-	if (ms < 0) ms = 0;
 	rt->h = ms/3600000;
 	rt->m = (ms%3600000)/60000;
 	rt->s = (ms%60000)/1000;

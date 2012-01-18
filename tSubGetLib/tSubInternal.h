@@ -85,14 +85,11 @@ typedef struct RTime {
 
 int ccStart(Queue ccq, __int64 timeStart);
 void ccEnd(Queue ccq, __int64 timeEnd);
-int capStart(CaptionCluster *cc);
-void capEnd(CaptionCluster *cc);
 int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val);
 
 int readerInit(CaptionsParser *p);
 void readerClose(CaptionsParser *p);
 
-//Rename
 int parseSample(CaptionsParser *p, Sample smp);
 
 void ngCallbackInit(CaptionsParser *p);

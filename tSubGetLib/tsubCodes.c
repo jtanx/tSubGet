@@ -1,5 +1,11 @@
 #include <stdlib.h>
-//Codes based off tvi_vbi.c from the MPlayer project.
+/*
+   Codes based off tvi_vbi.c from the MPlayer project.
+   fixHamm48 is used to remove Hamming 8/4 protection,
+   whilst fixParity is used to remove odd parity
+   protection (as described in section 8 of the
+   ETS 300 706 document).
+*/
 const unsigned char fixHamm48[256]={
 	0x01, 0xff, 0x01, 0x01, 0xff, 0x00, 0x01, 0xff,
 	0xff, 0x02, 0x01, 0xff, 0x0a, 0xff, 0xff, 0x07,
@@ -68,6 +74,9 @@ const unsigned char fixParity[256]={
 	0xF0, 0x71, 0x72, 0xF3, 0x74, 0xF5, 0xF6, 0x77, 
 	0x78, 0xF9, 0xFA, 0x7B, 0xFC, 0x7D, 0x7E, 0xFF };
 
+/*
+   Some codes used for displaying text correctly
+*/
 const wchar_t subsets[1][13] =
 {
 	{ //English option subset

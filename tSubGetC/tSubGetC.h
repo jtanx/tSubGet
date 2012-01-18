@@ -5,11 +5,10 @@
 #include "..\\tSubGetLib\\tSubGetLib.h"
 
 #ifdef _DEBUG
-#pragma comment (lib, "..\\Bin\\Debug\\tSubGetLib.lib")
+#pragma comment (lib, "tSubGetLib.lib")
 #else
-#pragma comment (lib, "..\\Bin\\tSubGetLib.lib")
+#pragma comment (lib, "tSubGetLib.lib")
 #endif
-#pragma comment (lib, "Strmiids.lib")
 
 /*
 tsubgetc -d msDelay -c -p pageNum -o fileOut fileIn

@@ -60,6 +60,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="strmiids.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -122,6 +123,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="strmiids.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
