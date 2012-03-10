@@ -179,15 +179,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\tSubInterface.c"
+				RelativePath=".\tSubInputList.c"
 				>
 			</File>
 			<File
-				RelativePath=".\tSubList.c"
+				RelativePath=".\tSubMainInterface.c"
 				>
 			</File>
 			<File
 				RelativePath=".\tSubPreferences.c"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubStatusInterface.c"
 				>
 			</File>
 		</Filter>

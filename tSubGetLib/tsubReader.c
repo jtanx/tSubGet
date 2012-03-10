@@ -1,4 +1,5 @@
 #include "tsubInternal.h"
+
 static int initGraph(FileReader *fr);
 static int addFilters(FileReader *fr, wchar_t *fileIn);
 static int findPin(IEnumPins *pEnum, IPin **pin, int direction);
@@ -10,8 +11,13 @@ int tsgProcess(CaptionsParser *p){
 
 	p->fr.pControl->lpVtbl->Run(p->fr.pControl);
 	do{
+		if (IsEventActive(p->hAbort)){
+			p->fr.pControl->lpVtbl->Stop(p->fr.pControl);
+			return PARSER_E_ABORT;
+		}
+
 		hr = p->fr.pEvent->lpVtbl->WaitForCompletion(p->fr.pEvent,100,&state);
-		if (!FAILED(hr)){
+		if (SUCCEEDED(hr)){
 			if (state == EC_COMPLETE){ 
 				ccEnd(p->cc, p->fr.duration);
 				p->fr.currentPos = p->fr.duration;
@@ -22,22 +28,30 @@ int tsgProcess(CaptionsParser *p){
 			}
 			else return PARSER_E_IN;
 		}
-		hr = p->fr.pControl->lpVtbl->GetState(p->fr.pControl,100,&state);
-		if (FAILED(hr) || state == State_Paused){
-			p->fr.pControl->lpVtbl->Stop(p->fr.pControl);
-			if (p->fr.state == PARSER_OK) p->fr.state = PARSER_E_IN;
-			
-			return p->fr.state;
-		}
+
+		p->fr.pControl->lpVtbl->GetState(p->fr.pControl,100,&state);
 	} while (state == State_Running);
 
-	return PARSER_E_IN;
+	return p->fr.state;
 }
 
 int tsgGetProgress(CaptionsParser *p){
 	if (p && p->fr.duration > 0)
 		return (int)(p->fr.currentPos*100/p->fr.duration);
 	return 0;
+}
+
+int tsgGetPositionStr(CaptionsParser *p, wchar_t *buf, size_t bufSize){
+	RTime total = {0}, current = {0};
+
+	if (!buf) return FALSE;
+	if (p){
+		convertMsToRTime(p->fr.duration / 10000, &total);
+		convertMsToRTime(p->fr.currentPos / 10000, &current);
+	}
+	_snwprintf_s(buf, bufSize, _TRUNCATE, L"%.2lld:%.2lld:%.2lld / %.2lld:%.2lld:%.2lld",
+					current.h, current.m, current.s, total.h, total.m, total.s);
+	return TRUE;			
 }
 
 int readerInit(CaptionsParser *p){
@@ -69,20 +83,21 @@ int readerInit(CaptionsParser *p){
 }
 
 void readerClose(CaptionsParser *p){
+	int ret = 0;
 	if (p->fr.pNullGrabber)
-		p->fr.pNullGrabber->lpVtbl->Release(p->fr.pNullGrabber);
+		ret = p->fr.pNullGrabber->lpVtbl->Release(p->fr.pNullGrabber);
 	if (p->fr.pNullGrabberF)
-		p->fr.pNullGrabberF->lpVtbl->Release(p->fr.pNullGrabberF);
+		ret = p->fr.pNullGrabberF->lpVtbl->Release(p->fr.pNullGrabberF);
 	if (p->fr.pSourceF)
-		p->fr.pSourceF->lpVtbl->Release(p->fr.pSourceF);
+		ret = p->fr.pSourceF->lpVtbl->Release(p->fr.pSourceF);
 	if (p->fr.pEvent)
-		p->fr.pEvent->lpVtbl->Release(p->fr.pEvent);
+		ret = p->fr.pEvent->lpVtbl->Release(p->fr.pEvent);
 	if (p->fr.pControl)
-		p->fr.pControl->lpVtbl->Release(p->fr.pControl);
+		ret = p->fr.pControl->lpVtbl->Release(p->fr.pControl);
 	if (p->fr.pStatus)
-		p->fr.pStatus->lpVtbl->Release(p->fr.pStatus);
+		ret = p->fr.pStatus->lpVtbl->Release(p->fr.pStatus);
 	if (p->fr.pGraph)
-		p->fr.pGraph->lpVtbl->Release(p->fr.pGraph);
+		ret = p->fr.pGraph->lpVtbl->Release(p->fr.pGraph);
 	ZeroMemory(&p->fr, sizeof(FileReader));	
 }
 

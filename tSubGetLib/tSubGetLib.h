@@ -7,6 +7,7 @@
 
 #define BUILD_VERSION		L"0.85PRE"
 #define BUILD_COUNT			10
+#define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
 
 enum ParserCodes {
 	PARSER_OK,
@@ -40,9 +41,12 @@ typedef struct ParserOpts {
 
 typedef struct CaptionsParser CaptionsParser;
 
+extern const wchar_t *colourSet[8];
+
 int tsgInit(CaptionsParser **p, ParserOpts *po);
 int tsgProcess(CaptionsParser *p);
 int tsgGetProgress(CaptionsParser *p);
+int tsgGetPositionStr(CaptionsParser *p, wchar_t *buf, size_t bufSize);
 void tsgSignalAbort(CaptionsParser *p);
 int tsgWriteout(CaptionsParser *p);
 void tsgClose(CaptionsParser **p);

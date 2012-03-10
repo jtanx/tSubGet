@@ -3,20 +3,42 @@
 #include <windows.h>
 #include <shlobj.h>
 #include <commctrl.h>
+#include <process.h>
 #include "tSubDefs.h"
 #include "..\\tSubGetLib\\tSubGetLib.h"
+
+#ifdef _DEBUG
+#include "C:\\Program Files\\Visual Leak Detector\\include\\vld.h"
+#pragma comment (lib, "C:\\Program Files\\Visual Leak Detector\\lib\\Win32\\vld.lib")
+#endif
 
 typedef struct InterfaceOpts {
 	ParserOpts po;
 	int autosave;
+	HWND hwndList;
 } InterfaceOpts;
 
+typedef struct StatusData {
+	CaptionsParser *p;
+	InterfaceOpts *io;
+	DWORD timeLapsed;
+	HWND hwndStatusDlg;
+	HANDLE hWorkerThread;
+} StatusData;
+
 BOOL CALLBACK MainDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK StatusDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+void ifInitLangSelection(HWND hwndLangList);
+void ifDisplayPrefs(HWND hwndMain, InterfaceOpts *io);
+void ifOnCommand(HWND hwnd, int id, HWND hwndCtl, InterfaceOpts *io);
 
 int listAdd(HWND hwndList, wchar_t *fullPath);
 int listDeleteSelected(HWND hwndList);
 int listClear(HWND hwndList);
 int listMoveSelected(HWND hwndList, int direction);
+int listGetCount(HWND hwndList);
+int listGetItem(HWND hwndList, int index, wchar_t **disp, wchar_t *full, size_t fBufSize);
 
 void prefLoad(InterfaceOpts *io);
 int prefSave(InterfaceOpts *io);

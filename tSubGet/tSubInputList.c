@@ -13,7 +13,7 @@ static int getExtentPx(HWND hwndList, wchar_t *text, int textLength){
 	
 	SelectObject(hdc, hOld);
 	ReleaseDC(hwndList, hdc);
-	return sz.cx + 10; //Add 10px for prettyness
+	return sz.cx + 10; //Add 10px for eye-candy
 }
 
 int listAdd(HWND hwndList, wchar_t *fullPath){
@@ -153,4 +153,26 @@ int listMoveSelected(HWND hwndList, int direction){
 
 	free(buf);
 	return ret;	
+}
+
+int listGetCount(HWND hwndList){
+	return SendMessage(hwndList, LB_GETCOUNT, 0, 0);
+}
+
+int listGetItem(HWND hwndList, int index, wchar_t **disp, wchar_t *full, size_t fBufSize){
+	wchar_t *data = (wchar_t*) SendMessage(hwndList, LB_GETITEMDATA, index, 0);
+	int dispLen = SendMessage(hwndList, LB_GETTEXTLEN, index, 0);
+
+	if ((int)data == LB_ERR || dispLen == LB_ERR) 
+		return FALSE;
+	else if (!(*disp = malloc(sizeof(wchar_t)*(dispLen + 1))))
+		return FALSE;
+
+	if (SendMessage(hwndList, LB_GETTEXT, index, (LPARAM) *disp) == LB_ERR ||
+		wcsncpy_s(full, fBufSize, data, _TRUNCATE)){
+		free(*disp);
+		return FALSE;
+	} 
+
+	return TRUE;
 }

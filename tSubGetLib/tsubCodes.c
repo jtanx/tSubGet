@@ -84,3 +84,12 @@ const wchar_t subsets[1][13] =
 		0x2c4,0x23,0x2013,0xbc,0x2225,0xbe,0xf7
 	}
 };
+
+/*
+   Misc codes
+*/
+const wchar_t *colourSet[8]	= 
+{
+	L"black", L"red", L"green", L"yellow",
+	L"blue", L"magenta", L"cyan", L"white" 
+};

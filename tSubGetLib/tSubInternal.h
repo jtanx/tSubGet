@@ -91,5 +91,6 @@ int readerInit(CaptionsParser *p);
 void readerClose(CaptionsParser *p);
 
 int parseSample(CaptionsParser *p, Sample smp);
+void convertMsToRTime(__int64 ms, RTime *rt);
 
 void ngCallbackInit(CaptionsParser *p);

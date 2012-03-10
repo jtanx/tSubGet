@@ -2,10 +2,6 @@
 static int parsePage(CaptionsParser *p, Sample smp);
 static int fileExists(wchar_t *file);
 static void getDefaultOutputFile(ParserOpts *po);
-static void convertMsToRTime(__int64 ms, RTime *rt);
-
-static const unsigned colours[8] = {0x000000, 0xE00B0B, 0x54BA32, 0xE3EB50, 
-							        0x55A9ED, 0xE368DF, 0x7DDBF5, 0xFFFFFF};
 
 int tsgInit(CaptionsParser **p, ParserOpts *po){
 	int ret, i;
@@ -71,8 +67,8 @@ int tsgWriteout(CaptionsParser *p){
 		return PARSER_E_OUT_DENIED;
 
 	for (i = 0; cc; i++){
-		convertMsToRTime(cc->timeStart, &timeStart);
-		convertMsToRTime(cc->timeEnd, &timeEnd);
+		convertMsToRTime(cc->timeStart + p->po.delay, &timeStart);
+		convertMsToRTime(cc->timeEnd + p->po.delay, &timeEnd);
 		fwprintf(fp, L"%d\n", i+1);
 		fwprintf(fp,L"%.2lld:%.2lld:%.2lld,%.3lld --> %.2lld:%.2lld:%.2lld,%.3lld\n",
 				timeStart.h,timeStart.m,timeStart.s,timeStart.ms,
@@ -80,9 +76,8 @@ int tsgWriteout(CaptionsParser *p){
 		
 		while (qbPeek(cc->caps, 0, TRUE, &cap) && cap){
 			if (p->po.addColourTags && cap->fgColour != WHITE)
-				fwprintf(fp, L"<font color=\"#%.6x\">", 
-						 p->po.customColours ? p->po.colours[cap->fgColour] : 
-											   colours[cap->fgColour]);
+				fwprintf(fp, L"<font color=\"%s\">", 
+							colourSet[cap->fgColour]);
 			fwprintf(fp, L"%s", sbGetString(cap->text));
 			if (p->po.addColourTags && cap->fgColour != WHITE)
 				fwprintf(fp, L"</font>");
@@ -106,30 +101,31 @@ int tsgWriteout(CaptionsParser *p){
 }
 
 void tsgClose(CaptionsParser **p){
-	if (*p){
-		CaptionCluster *cc;
+	CaptionCluster *cc;
+	if (!*p) return;
 
-		readerClose(*p);
-		while (qbPeek((*p)->cc, 0, TRUE, &cc)){
-			Caption *c;
-			
-			while (qbPeek(cc->caps, 0, TRUE, &c)){
-				sbFree(c->text);
-				qbFreeSingle(cc->caps, TRUE);
-			}
-			qbClose(&cc->caps);
-			qbFreeSingle((*p)->cc, TRUE);
+	readerClose(*p);
+	while (qbPeek((*p)->cc, 0, TRUE, &cc)){
+		Caption *c;
+		
+		while (qbPeek(cc->caps, 0, TRUE, &c)){
+			sbFree(c->text);
+			qbFreeSingle(cc->caps, TRUE);
 		}
-		qbClose(&(*p)->cc);
-
-		CloseHandle((*p)->hAbort);
+		qbClose(&cc->caps);
+		qbFreeSingle((*p)->cc, TRUE);
 	}
+	qbClose(&(*p)->cc);
+
+	CloseHandle((*p)->hAbort);
+	
 	free(*p);
 	*p = NULL;
 }
 
 void tsgSignalAbort(CaptionsParser *p){
-	SetEvent(p->hAbort);
+	if (p)
+		SetEvent(p->hAbort);
 }
 
 void tsgGetError(int errCode, wchar_t *buf, int bufSize){
@@ -249,7 +245,9 @@ static void getDefaultOutputFile(ParserOpts *po){
 	wcsncat_s(po->fileOut,MAX_PATH,EXT,_TRUNCATE);
 }
 
-static void convertMsToRTime(__int64 ms, RTime *rt){
+void convertMsToRTime(__int64 ms, RTime *rt){
+	if (ms < 0) ms = 0;
+
 	rt->h = ms/3600000;
 	rt->m = (ms%3600000)/60000;
 	rt->s = (ms%60000)/1000;

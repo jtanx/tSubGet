@@ -7,22 +7,24 @@
 #define setString(hKey, keyName, pBuf, bufSize) \
 		RegSetValueEx(hKey, keyName, 0, REG_SZ, (void*)pBuf, bufSize)
 
-static const wchar_t *keyName = L"Software\\tSubget";
-static const wchar_t *numSet[] = 
-{L"langID", L"addColourTags", L"customColours", 
- L"overwriteOutput", L"pageNumber", L"delay"};
-static const wchar_t *colourSet[8] = 
-{L"black", L"red", L"green", L"yellow",
- L"blue", L"magenta", L"cyan", L"white"};
-static const wchar_t *stringSet[] = {L"folderOut"};
+static const wchar_t *keyName		= L"Software\\tSubget";
+static const wchar_t *stringSet[]	= 
+{
+	L"folderOut" 
+};
+static const wchar_t *numSet[]		= 
+{
+	L"langID", L"addColourTags", L"customColours", 
+	L"overwriteOutput", L"pageNumber", L"delay" 
+};
 
-__inline static void loadInt(HKEY hKey, const wchar_t *keyName, void *pBuf, 
-							 int bufSize, int defaultValue){
+static void loadInt(HKEY hKey, const wchar_t *keyName, void *pBuf, 
+							int bufSize, int defaultValue){
 	if (loadValue(hKey, keyName, pBuf, bufSize) != ERROR_SUCCESS)
 			*((int*)(pBuf)) = defaultValue;
 }
-__inline static void loadString(HKEY hKey, const wchar_t *keyName, void *pBuf, 
-								int bufSize){
+static void loadString(HKEY hKey, const wchar_t *keyName, void *pBuf, 
+							int bufSize){
 	if (loadValue(hKey, keyName, pBuf, bufSize) != ERROR_SUCCESS)
 			memset(pBuf, 0, sizeof(wchar_t)*(bufSize));
 }
