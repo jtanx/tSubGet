@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define BUILD_VERSION		L"0.85PRE"
-#define BUILD_COUNT			10
+#define BUILD_VERSION		L"0.9.5"
+//#define BUILD_COUNT			15
+#define BUILD_DATE			L"1 Apr 2012"
 #define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
 
 enum ParserCodes {
@@ -26,14 +27,17 @@ typedef enum LangID {
 	LANGID_DEFAULT
 } LangID;
 
+typedef struct OutputFormatting {
+	int fgColour[8];
+} OutputFormatting;
+
 typedef struct ParserOpts {
 	wchar_t fileIn[MAX_PATH];
 	wchar_t fileOut[MAX_PATH];
 	wchar_t folderOut[MAX_PATH];
-	unsigned colours[8];
+	OutputFormatting fmt;
 	LangID langId;
 	unsigned addColourTags;
-	unsigned customColours;
 	unsigned overwriteOutput;
 	unsigned pageNumber;	
 	__int64 delay;

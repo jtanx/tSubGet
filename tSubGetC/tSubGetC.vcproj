@@ -134,7 +134,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalManifestDependencies="type=&apos;win32&apos;  name=&apos;NullGrabber&apos; version=&apos;0.8.0.1&apos; processorArchitecture=&apos;X86&apos;"
+				AdditionalManifestDependencies="type=&apos;win32&apos;  name=&apos;NullGrabber&apos; version=&apos;0.8.5.0&apos; processorArchitecture=&apos;X86&apos;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -193,7 +193,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\tSubGet.ico"
+				RelativePath="..\tSubGet\tSubGet.ico"
 				>
 			</File>
 			<File

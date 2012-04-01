@@ -8,3 +8,5 @@ you will also need:
   --> Compile the 'baseclasses' project within this SDK,
       and update the path to the generated library
       correspondingly in the NullGrabber project.
+* Resource Hacker to add 'threadingModel="apartment"' to the comclass def for
+  the NullGrabber manifest

@@ -7,10 +7,7 @@
 #include "tSubDefs.h"
 #include "..\\tSubGetLib\\tSubGetLib.h"
 
-#ifdef _DEBUG
-#include "C:\\Program Files\\Visual Leak Detector\\include\\vld.h"
-#pragma comment (lib, "C:\\Program Files\\Visual Leak Detector\\lib\\Win32\\vld.lib")
-#endif
+#define GUI_BUILD_VERSION L"0.9.5"
 
 typedef struct InterfaceOpts {
 	ParserOpts po;
@@ -27,6 +24,7 @@ typedef struct StatusData {
 } StatusData;
 
 BOOL CALLBACK MainDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK OutputFormatDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK StatusDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 void ifInitLangSelection(HWND hwndLangList);
@@ -39,6 +37,7 @@ int listClear(HWND hwndList);
 int listMoveSelected(HWND hwndList, int direction);
 int listGetCount(HWND hwndList);
 int listGetItem(HWND hwndList, int index, wchar_t **disp, wchar_t *full, size_t fBufSize);
+int listLocateFirstSelected(HWND hwndList);
 
 void prefLoad(InterfaceOpts *io);
 int prefSave(InterfaceOpts *io);

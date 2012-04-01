@@ -90,6 +90,6 @@ const wchar_t subsets[1][13] =
 */
 const wchar_t *colourSet[8]	= 
 {
-	L"black", L"red", L"green", L"yellow",
-	L"blue", L"magenta", L"cyan", L"white" 
+	L"Black", L"Red", L"Green", L"Yellow",
+	L"Blue", L"Magenta", L"Cyan", L"White" 
 };

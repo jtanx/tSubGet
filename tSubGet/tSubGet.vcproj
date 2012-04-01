@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tSubOutputFormatInterface.c"
+				>
+			</File>
+			<File
 				RelativePath=".\tSubPreferences.c"
 				>
 			</File>

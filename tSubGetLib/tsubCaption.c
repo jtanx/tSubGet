@@ -30,7 +30,7 @@ int ccStart(Queue ccq, __int64 timeStart){
    working on the principle of displaying a cluster until the next cluster
    appears.
 */
-void ccEnd(Queue ccq, __int64 timeEnd){
+void ccEnd(Queue ccq, __int64 timeEnd, unsigned endIsSignaled){
 	CaptionCluster *ccCurrent, *ccPrev;
 	Caption *c;
 
@@ -57,9 +57,13 @@ void ccEnd(Queue ccq, __int64 timeEnd){
 		timeEnd = 0;
 	timeEnd /= 10000;
 
-	if (ccCurrent->timeStart > timeEnd || ccCurrent->timeStart < 0)
-		ccCurrent->timeStart = 0;
-	ccCurrent->timeEnd = timeEnd;
+	if (!ccCurrent->endIsSignaled){
+		if (ccCurrent->timeStart > timeEnd || ccCurrent->timeStart < 0)
+			ccCurrent->timeStart = 0;
+		ccCurrent->timeEnd = timeEnd;
+	}
+	if (endIsSignaled)
+		ccCurrent->endIsSignaled = TRUE;
 }
 
 /*

@@ -156,7 +156,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.0.1, type=win32"
+				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32"
 				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
 				ComponentFileName="NullGrabber.dll"
 			/>

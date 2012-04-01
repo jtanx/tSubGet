@@ -176,3 +176,34 @@ int listGetItem(HWND hwndList, int index, wchar_t **disp, wchar_t *full, size_t 
 
 	return TRUE;
 }
+
+int listLocateFirstSelected(HWND hwndList){
+	int nSelected = SendMessage(hwndList, LB_GETSELCOUNT, 0, 0);
+	int *buf, nReceived, ret = TRUE;
+	
+	if (nSelected <= 0) return FALSE;
+	
+	buf = malloc(sizeof(int)*nSelected);
+	if (!buf) return FALSE;
+
+	nReceived = SendMessage(hwndList, LB_GETSELITEMS, nSelected, (LPARAM) buf);
+	if (nReceived != nSelected)
+		ret = FALSE;
+	else{
+		wchar_t *data = (wchar_t*) SendMessage(hwndList, LB_GETITEMDATA, buf[0], 0);
+		if ((int)data == LB_ERR)
+			ret = FALSE;
+		else {
+			ITEMIDLIST __unaligned *iilFPath = {0};
+
+			CoInitialize(NULL);
+			iilFPath = ILCreateFromPath(data);
+			SHOpenFolderAndSelectItems(iilFPath,0,NULL,0);
+			ILFree(iilFPath);
+			CoUninitialize();
+		}
+	}
+
+	free(buf);
+	return ret;
+}

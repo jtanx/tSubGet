@@ -28,11 +28,12 @@ void ifDisplayPrefs(HWND hwndMain, InterfaceOpts *io){
 	//Set teletext page display
 	_snwprintf_s(dispText, 4, _TRUNCATE, L"%X", disp);
 	SetDlgItemText(hwndMain, IDE_TTPAGE, dispText);
+	SendDlgItemMessage(hwndMain, IDE_TTPAGE, EM_LIMITTEXT, 3, 0);
 
 	SetDlgItemInt(hwndMain, IDE_DELAY, (UINT) io->po.delay, TRUE);
 
 	//Set language selection display
-	SendMessage(GetDlgItem(hwndMain, IDL_CODEPAGE), CB_SETCURSEL, io->po.langId, 0);
+	SendDlgItemMessage(hwndMain, IDL_CODEPAGE, CB_SETCURSEL, io->po.langId, 0);
 }
 
 static void ifReadPrefs(HWND hwndMain, InterfaceOpts *io){
@@ -118,6 +119,10 @@ static void ifOnListCommand(HWND hwnd, int id, HWND hwndList, InterfaceOpts *io)
 			}
 		} break;
 
+		case ID_LISTLOCATE:{
+			listLocateFirstSelected(hwndList);
+		} break;
+
 		case ID_LISTDEL:{
 			listDeleteSelected(hwndList);
 		} break;
@@ -147,6 +152,14 @@ void ifOnCommand(HWND hwnd, int id, HWND hwndCtl, InterfaceOpts *io){
 		} break;
 
 		case ID_ABOUT:{
+			wchar_t buf[BUFSIZ];
+			_snwprintf_s(buf, BUFSIZ, _TRUNCATE,
+				L"tSubGet Version %s (Core version %s (%s))\n\n"
+				L"tSubGet extracts teletext-formatted subtitles (usually from DVB-style recordings) "
+				L"that may be present in WTV or DVR-MS files. Note that only DVR-MS files are "
+				L"supported in Windows XP.\n\n"
+				L"caketrim 2012", GUI_BUILD_VERSION, BUILD_VERSION, BUILD_DATE);
+			MessageBox(hwnd, buf, L"About", MB_ICONINFORMATION);
 		} break;
 
 		case ID_TOPMOST:{
@@ -154,6 +167,11 @@ void ifOnCommand(HWND hwnd, int id, HWND hwndCtl, InterfaceOpts *io){
 			CheckMenuItem(GetMenu(hwnd), ID_TOPMOST, ret);
 			SetWindowPos(hwnd, ret ? HWND_TOPMOST : HWND_NOTOPMOST, 1, 1, 1, 1,
 				SWP_NOREDRAW|SWP_NOSIZE|SWP_NOMOVE);
+		} break;
+
+		case ID_OUTPUTFORMAT:{
+			DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_OUTPUTFORMAT),
+						hwnd, OutputFormatDlgProc, (LPARAM) io);
 		} break;
 
 		case ID_AUTOSAVE:{

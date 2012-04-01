@@ -4,7 +4,7 @@ static int fileExists(wchar_t *file);
 static void getDefaultOutputFile(ParserOpts *po);
 
 int tsgInit(CaptionsParser **p, ParserOpts *po){
-	int ret, i;
+	int ret;
 	
 	if (!p || !po || !fileExists(po->fileIn))
 		return PARSER_E_PARAMS;
@@ -16,11 +16,6 @@ int tsgInit(CaptionsParser **p, ParserOpts *po){
 		getDefaultOutputFile(po);
 	if (!po->overwriteOutput && fileExists(po->fileOut))
 		return PARSER_E_OUT_EXISTS;
-
-	//Ensure custom colours are reasonable...
-	if (po->customColours)
-		for (i = 0; i < 8; i++)
-			po->colours[i] &= 0xFFFFFF;
 	
 	//Allocate buffer for CaptionsParser, since everything seems ok.
 	*p = calloc(1, sizeof(CaptionsParser));
@@ -75,12 +70,21 @@ int tsgWriteout(CaptionsParser *p){
 				timeEnd.h,timeEnd.m,timeEnd.s,timeEnd.ms);
 		
 		while (qbPeek(cc->caps, 0, TRUE, &cap) && cap){
-			if (p->po.addColourTags && cap->fgColour != WHITE)
-				fwprintf(fp, L"<font color=\"%s\">", 
-							colourSet[cap->fgColour]);
+			if (p->po.addColourTags){
+				if (p->po.fmt.fgColour[cap->fgColour] >= 0)
+					fwprintf(fp, L"<font color=\"#%06.6X\">", 
+						p->po.fmt.fgColour[cap->fgColour]);
+				else if (cap->fgColour != WHITE)
+					fwprintf(fp, L"<font color=\"%s\">", 
+						colourSet[cap->fgColour]);
+			}
+
 			fwprintf(fp, L"%s", sbGetString(cap->text));
-			if (p->po.addColourTags && cap->fgColour != WHITE)
-				fwprintf(fp, L"</font>");
+			if (p->po.addColourTags){
+				if (p->po.fmt.fgColour[cap->fgColour] >= 0 || cap->fgColour != WHITE)
+					fwprintf(fp, L"</font>");
+			}
+
 			if (!cap->noBreak || !qbPeek(cc->caps, 0, TRUE, NULL))
 				fwprintf(fp, L"\n");
 			
@@ -201,7 +205,8 @@ static int parsePage(CaptionsParser *p, Sample smp){
 	int i, j, ret;
 	int bufPos = TT_PACKETSIZE;
 
-	ccEnd(p->cc, smp.time);
+	//NB: Third parameter determines if this page is an 'erase' page. ('Byte 9, bit 8')
+	ccEnd(p->cc, smp.time, (fixHamm48[smp.pBuf[5]] & 1 << 3));
 	ccStart(p->cc, smp.time);
 	
 	for (i = 0; i < TT_PACKETSPP - 1; i++, bufPos += TT_PACKETSIZE){

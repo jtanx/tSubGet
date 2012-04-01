@@ -19,7 +19,7 @@ int tsgProcess(CaptionsParser *p){
 		hr = p->fr.pEvent->lpVtbl->WaitForCompletion(p->fr.pEvent,100,&state);
 		if (SUCCEEDED(hr)){
 			if (state == EC_COMPLETE){ 
-				ccEnd(p->cc, p->fr.duration);
+				ccEnd(p->cc, p->fr.duration, FALSE);
 				p->fr.currentPos = p->fr.duration;
 
 				//IMPORTANT: Not stopping graph will lead to mem leaks

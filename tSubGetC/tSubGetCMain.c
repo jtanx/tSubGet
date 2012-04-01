@@ -81,7 +81,7 @@ int wmain(int argc, wchar_t *argv[]){
 	ParserOpts po = {0};
 	CaptionsParser *p;
 
-	wprintf (L"tSubGetC - Version: 0.5PRE, Core version: %s, build %d\n\n",BUILD_VERSION, BUILD_COUNT);
+	wprintf (L"tSubGetC - Version: 0.8, Core version: %s (%s)\n\n",BUILD_VERSION, BUILD_DATE);
 	if (argc < 2){
 		printHelp(argv[0]);
 		return 1;

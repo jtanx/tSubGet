@@ -73,6 +73,7 @@ typedef struct CaptionCluster {
 	__int64 timeStart;
 	__int64 timeEnd;
 	unsigned hasActiveCap;
+	unsigned endIsSignaled;
 	Queue caps;
 } CaptionCluster;
 
@@ -84,7 +85,7 @@ typedef struct RTime {
 } RTime;
 
 int ccStart(Queue ccq, __int64 timeStart);
-void ccEnd(Queue ccq, __int64 timeEnd);
+void ccEnd(Queue ccq, __int64 timeEnd, unsigned endIsSignaled);
 int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val);
 
 int readerInit(CaptionsParser *p);
