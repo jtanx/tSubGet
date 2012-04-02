@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define BUILD_VERSION		L"0.9.5"
+#define BUILD_VERSION		L"0.9.6"
 //#define BUILD_COUNT			15
-#define BUILD_DATE			L"1 Apr 2012"
+#define BUILD_DATE			L"2 Apr 2012"
 #define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
+#define IsLangId(id) (id >= LANGID_DEFAULT && id < LANGID_NULL)
 
 enum ParserCodes {
 	PARSER_OK,
@@ -24,7 +25,21 @@ enum ParserCodes {
 };
 
 typedef enum LangID {
-	LANGID_DEFAULT
+	LANGID_DEFAULT,
+	LANGID_CZECHSLOVAK,
+	LANGID_ENGLISH,
+	LANGID_ESTONIAN,
+	LANGID_FRENCH,
+	LANGID_GERMAN,
+	LANGID_ITALIAN,
+	LANGID_LETTISHLITHUANIAN,
+	LANGID_POLISH,
+	LANGID_PORTUGUESESPANISH,
+	LANGID_ROMANIAN,
+	LANGID_SERBIANCROATIANSLOVENIAN,
+	LANGID_SWEDISHFINNISHHUNGARIAN,
+	LANGID_TURKISH,
+	LANGID_NULL
 } LangID;
 
 typedef struct OutputFormatting {

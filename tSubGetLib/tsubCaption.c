@@ -132,15 +132,15 @@ int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 
 		switch (val){
 			case 0x23: case 0x24:
-				parsedVal = subsets[0][val-0x23]; break;
+				parsedVal = latinNOSubsets[langIdMap[p->po.langId]][val-0x23]; break;
 			case 0x40:
-				parsedVal = subsets[0][2]; break;
+				parsedVal = latinNOSubsets[langIdMap[p->po.langId]][2]; break;
 			case 0x5B: case 0x5C: case 0x5D: case 0x5E: case 0x5F:
-				parsedVal = subsets[0][val-0x58]; break;
+				parsedVal = latinNOSubsets[langIdMap[p->po.langId]][val-0x58]; break;
 			case 0x60:
-				parsedVal = subsets[0][8]; break;
+				parsedVal = latinNOSubsets[langIdMap[p->po.langId]][8]; break;
 			case 0x7B: case 0x7C: case 0x7D: case 0x7E:
-				parsedVal = subsets[0][val-0x74]; break;
+				parsedVal = latinNOSubsets[langIdMap[p->po.langId]][val-0x72]; break;
 			default:
 				parsedVal = (wchar_t)val;
 		}

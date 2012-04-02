@@ -8,7 +8,7 @@ int tsgInit(CaptionsParser **p, ParserOpts *po){
 	
 	if (!p || !po || !fileExists(po->fileIn))
 		return PARSER_E_PARAMS;
-	else if (po->pageNumber > 0x7FF || po->langId != LANGID_DEFAULT)
+	else if (po->pageNumber > 0x7FF || !IsLangId(po->langId))
 		return PARSER_E_PARAMS;
 	
 	//Determine the correct output filename and determine if it exists.
@@ -170,7 +170,33 @@ void tsgGetLangStr(LangID lang, wchar_t *buf, size_t bufSize){
 
 	switch (lang){
 		case LANGID_DEFAULT:
+			ptr = L"(Default) Latin/English"; break;
+		case LANGID_CZECHSLOVAK:
+			ptr = L"Latin/Czech, Slovak"; break;
+		case LANGID_ENGLISH:
 			ptr = L"Latin/English"; break;
+		case LANGID_ESTONIAN:
+			ptr = L"Latin/Estonian"; break;
+		case LANGID_FRENCH:
+			ptr = L"Latin/French"; break;
+		case LANGID_GERMAN:
+			ptr = L"Latin/German"; break;
+		case LANGID_ITALIAN:
+			ptr = L"Latin/Italian"; break;
+		case LANGID_LETTISHLITHUANIAN:
+			ptr = L"Latin/Lettish, Lithuanian"; break;
+		case LANGID_POLISH:
+			ptr = L"Latin/Polish"; break;
+		case LANGID_PORTUGUESESPANISH:
+			ptr = L"Latin/Portuguese, Spanish"; break;
+		case LANGID_ROMANIAN:
+			ptr = L"Latin/Romanian"; break;
+		case LANGID_SERBIANCROATIANSLOVENIAN:
+			ptr = L"Latin/Serbian, Croatian, Slovenian"; break;
+		case LANGID_SWEDISHFINNISHHUNGARIAN:
+			ptr = L"Latin/Swedish, Finnish, Hungarian"; break;
+		case LANGID_TURKISH:
+			ptr = L"Latin/Turkish"; break;
 		default:
 			ptr=  L"Unknown (!!)"; break;
 	}

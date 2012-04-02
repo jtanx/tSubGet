@@ -4,7 +4,7 @@ void ifInitLangSelection(HWND hwndLangList){
 	int i;
 	wchar_t buf[BUFSIZ];
 
-	for (i = 0; i <= LANGID_DEFAULT; i++){
+	for (i = 0; i < LANGID_NULL; i++){
 		tsgGetLangStr(i, buf, BUFSIZ);
 		SendMessage(hwndLangList, CB_ADDSTRING, 0, (LPARAM) buf);
 	}	

@@ -16,9 +16,10 @@
 #define EXT_SIZE		5
 #define EXT				L".srt"
 
-const unsigned char fixHamm48[256];
+extern const unsigned char fixHamm48[256];
 extern const unsigned char fixParity[256];
-extern const wchar_t subsets[1][13];
+extern const wchar_t latinNOSubsets[13][13];
+extern const int langIdMap[13];
 
 enum colours {
 	BLACK,RED,GREEN,YELLOW,BLUE,
