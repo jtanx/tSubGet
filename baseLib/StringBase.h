@@ -1,6 +1,6 @@
 /* Header file for StringBase */
 struct StringBase {
-	wchar_t *buffer;
+	char *buffer;
 	int bufferSize;
 	int incrementSize;
 	int currentPosition;

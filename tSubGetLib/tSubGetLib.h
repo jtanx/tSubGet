@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define BUILD_VERSION		L"0.9.6"
+#define BUILD_VERSION		L"0.9.6.5"
 //#define BUILD_COUNT			15
-#define BUILD_DATE			L"2 Apr 2012"
+#define BUILD_DATE			L"5 Apr 2012"
 #define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
 #define IsLangId(id) (id >= LANGID_DEFAULT && id < LANGID_NULL)
 

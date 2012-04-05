@@ -53,46 +53,49 @@ int tsgWriteout(CaptionsParser *p){
 	CaptionCluster *cc;
 	Caption *cap;
 	RTime timeStart, timeEnd;
+	//const unsigned char BOM[3] = {0xEF,0xBB,0xBF};
 
-	if (!p) 
+	if (!p)
 		return PARSER_E_PARAMS;
 	else  if (!qbPeek(p->cc, 0, TRUE, &cc) || !cc)
 		return PARSER_E_NOCAPS;
 	else if (_wfopen_s(&fp, p->po.fileOut, L"w"))
 		return PARSER_E_OUT_DENIED;
 
+
+//	fwrite(BOM, sizeof(BOM), 1, fp);
 	for (i = 0; cc; i++){
 		convertMsToRTime(cc->timeStart + p->po.delay, &timeStart);
 		convertMsToRTime(cc->timeEnd + p->po.delay, &timeEnd);
-		fwprintf(fp, L"%d\n", i+1);
-		fwprintf(fp,L"%.2lld:%.2lld:%.2lld,%.3lld --> %.2lld:%.2lld:%.2lld,%.3lld\n",
+		fprintf(fp, "%d\n", i+1);
+		fprintf(fp, "%.2lld:%.2lld:%.2lld,%.3lld --> %.2lld:%.2lld:%.2lld,%.3lld\n",
 				timeStart.h,timeStart.m,timeStart.s,timeStart.ms,
 				timeEnd.h,timeEnd.m,timeEnd.s,timeEnd.ms);
 		
 		while (qbPeek(cc->caps, 0, TRUE, &cap) && cap){
 			if (p->po.addColourTags){
 				if (p->po.fmt.fgColour[cap->fgColour] >= 0)
-					fwprintf(fp, L"<font color=\"#%06.6X\">", 
+					fprintf(fp, "<font color=\"#%06.6X\">", 
 						p->po.fmt.fgColour[cap->fgColour]);
 				else if (cap->fgColour != WHITE)
-					fwprintf(fp, L"<font color=\"%s\">", 
+					fprintf(fp, "<font color=\"%ls\">", 
 						colourSet[cap->fgColour]);
 			}
 
-			fwprintf(fp, L"%s", sbGetString(cap->text));
+			fprintf(fp, "%s", sbGetString(cap->text));
 			if (p->po.addColourTags){
 				if (p->po.fmt.fgColour[cap->fgColour] >= 0 || cap->fgColour != WHITE)
-					fwprintf(fp, L"</font>");
+					fprintf(fp, "</font>");
 			}
 
 			if (!cap->noBreak || !qbPeek(cc->caps, 0, TRUE, NULL))
-				fwprintf(fp, L"\n");
+				fprintf(fp, "\n");
 			
 			sbFree(cap->text);
 			if (!qbFreeSingle(cc->caps, TRUE))
 				return PARSER_E_MEM;
 		}
-		fwprintf (fp, L"\n");
+		fprintf (fp, "\n");
 		qbClose(&cc->caps);
 		
 		if (!qbFreeSingle(p->cc, TRUE))

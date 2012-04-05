@@ -18,14 +18,13 @@ extern int qbFreeSingle(Queue qb, int fromFront);
 extern void qbClose(Queue *qb);
 /* End QueueBase Declarations */
 
-/* StringBase - A very simple string builder */
+/* StringBase - A very simple string builder (UTF-8) */
 typedef struct StringBase *StringBase;
 
 extern StringBase sbCreate(int initialSize, int incrementSize);
 extern void sbFree(StringBase sb);
-extern int sbAddChar(StringBase sb, wchar_t c);
-extern int sbAddString(StringBase sb, wchar_t *s);
-extern wchar_t *sbGetString(StringBase sb);
+extern int sbAddUC(StringBase sb, unsigned __int32 codePoint);
+extern char *sbGetString(StringBase sb);
 extern int sbGetCharCount(StringBase sb);
 /* End StringBase Declarations */
 

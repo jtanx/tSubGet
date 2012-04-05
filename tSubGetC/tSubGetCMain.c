@@ -1,7 +1,7 @@
 #include "tSubGetC.h"
 
 static void printHelp(wchar_t *exec){
-	wprintf (L"Usage:\n%s [-d msDelay] [-p pageNum] [-o fileOut] [-c] fileIn\n", exec);
+	wprintf (L"Usage:\n%s [-d msDelay] [-p pageNum] [-o fileOut] [-c] [-y] [-l langid] fileIn\n", exec);
 	wprintf (L"\t[-d msDelay]\tDelay in ms to add to each caption. Can be "
 			 L"positive\n\t\t\tor negative.\n");
 	wprintf (L"\t[-p pageNum]\tSpecifies the teletext page on which to search for\n"
@@ -10,6 +10,9 @@ static void printHelp(wchar_t *exec){
 			 L"\n\t\t\toriginal filename with the extension removed and"
 			 L"\n\t\t\t'.srt' appended.\n");
 	wprintf (L"\t[-c]\t\tAdds colour tags to the output, if present.\n");
+	wprintf (L"\t[-y]\t\tOverwrites the output without prompt.\n");
+	wprintf (L"\t[-l langid]\tSelects the required language id. For a list of IDs,"
+			 L"\n\t\t\tenter 'help' instead of an id.\n");
 	wprintf (L"\n");
 }
 
@@ -17,6 +20,8 @@ static int parseArgs(ParserOpts *po, int *pos, int argc, wchar_t *argv[]){
 	if (argv[*pos][0] == L'-'){
 		switch (argv[*pos][1]){
 			case L'c': po->addColourTags = TRUE; break;
+
+			case L'y': po->overwriteOutput = TRUE; break;
 			
 			case L'd':{
 				wchar_t *failPtr;
@@ -41,6 +46,27 @@ static int parseArgs(ParserOpts *po, int *pos, int argc, wchar_t *argv[]){
 				wcsncpy_s(po->fileOut,MAX_PATH,argv[++(*pos)],_TRUNCATE);
 			} break;
 
+			case L'l':{
+				wchar_t *failPtr;
+
+				if (*pos == argc - 1) return FALSE;
+				if (!_wcsicmp(argv[++(*pos)], L"help")){
+					int i;
+					wchar_t buf[BUFSIZ];
+
+					wprintf (L"%-13s %s\n", L"Language ID", L"Language"); 
+					for (i = LANGID_DEFAULT; i < LANGID_NULL; i++){
+						tsgGetLangStr(i, buf, BUFSIZ);
+						wprintf (L"%-13d %s\n", i, buf);
+					}
+					return FALSE;
+				}
+
+				po->langId = wcstol(argv[*pos], &failPtr, 10);
+				if (*failPtr != L'\0') return FALSE;
+				else if (!IsLangId(po->langId)) return FALSE;
+			} break;
+
 			default: return FALSE;
 		} //End switch
 	} else {
@@ -51,11 +77,16 @@ static int parseArgs(ParserOpts *po, int *pos, int argc, wchar_t *argv[]){
 }
 
 static void printArgs(ParserOpts *po){
-	wprintf (L"Input file:\t\t\"%s\"\n",po->fileIn);
-	wprintf (L"Output file:\t\t\"%s\"\n",po->fileOut[0] == L'\0' ? L"Default" : po->fileOut);
-	wprintf (L"Add colour tags:\t%s\n", po->addColourTags ? L"Yes" : L"No");
-	wprintf (L"Delay:\t\t\t%lld ms\n",po->delay);
-	wprintf (L"Teletext page:\t\t%.3X\n",!(po->pageNumber >> 8) ? (po->pageNumber | 8 << 8) : po->pageNumber);
+	wchar_t buf[BUFSIZ];
+
+	tsgGetLangStr(po->langId, buf, BUFSIZ);
+	wprintf (L"Input file:\t\t\t\"%s\"\n",po->fileIn);
+	wprintf (L"Output file:\t\t\t\"%s\"\n",po->fileOut[0] == L'\0' ? L"Default" : po->fileOut);
+	wprintf (L"Add colour tags:\t\t%s\n", po->addColourTags ? L"Yes" : L"No");
+	wprintf (L"Overwrite without prompt:\t%s\n", po->overwriteOutput ? L"Yes": L"No");
+	wprintf (L"Delay:\t\t\t\t%lld ms\n",po->delay);
+	wprintf (L"Teletext page:\t\t\t%.3X\n",!(po->pageNumber >> 8) ? (po->pageNumber | 8 << 8) : po->pageNumber);
+	wprintf (L"Language:\t\t\t%s\n", buf);
 	wprintf (L"\n");
 }
 
@@ -81,7 +112,7 @@ int wmain(int argc, wchar_t *argv[]){
 	ParserOpts po = {0};
 	CaptionsParser *p;
 
-	wprintf (L"tSubGetC - Version: 0.8, Core version: %s (%s)\n\n",BUILD_VERSION, BUILD_DATE);
+	wprintf (L"tSubGetC - Version: 0.9, Core version: %s (%s)\n\n",BUILD_VERSION, BUILD_DATE);
 	if (argc < 2){
 		printHelp(argv[0]);
 		return 1;
@@ -96,7 +127,7 @@ int wmain(int argc, wchar_t *argv[]){
 	
 	for (i = 1; i < argc; i++){
 		if (!parseArgs(&po, &i, argc, argv)){
-			wprintf (L"Error processing argument: %s\n",argv[i]);
+			wprintf (L"Stopped processing at argument: %s\n",argv[i]);
 			wprintf (L"Check the syntax, and ensure you have supplied valid parameters.\n");
 			return 1;
 		}

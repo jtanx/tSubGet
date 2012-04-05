@@ -97,7 +97,7 @@ int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 			capEnd(cc);
 		else{
 			if (currentCap->startFlag && sbGetCharCount(currentCap->text) > 0){
-				if (!sbAddChar(currentCap->text, L' '))
+				if (!sbAddUC(currentCap->text, ' '))
 					return PARSER_E_MEM;
 
 				if ((ret = capDuplicate(cc)) != PARSER_OK)
@@ -128,7 +128,7 @@ int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 				}
 		}
 	} else if (currentCap->startFlag){
-		wchar_t parsedVal;
+		unsigned __int32 parsedVal;
 
 		switch (val){
 			case 0x23: case 0x24:
@@ -142,9 +142,9 @@ int capAdd(CaptionsParser *p, unsigned posX, unsigned posY, unsigned val){
 			case 0x7B: case 0x7C: case 0x7D: case 0x7E:
 				parsedVal = latinNOSubsets[langIdMap[p->po.langId]][val-0x72]; break;
 			default:
-				parsedVal = (wchar_t)val;
+				parsedVal = val;
 		}
-		if (!sbAddChar(currentCap->text, parsedVal))
+		if (!sbAddUC(currentCap->text, parsedVal))
 			return PARSER_E_MEM;
 	}
 
@@ -209,7 +209,7 @@ static int ccIsDuplicate(CaptionCluster *ccA, CaptionCluster *ccB){
 
 	//Both must be evaluated (NOT &&)
 	while(qbPeek(ccA->caps, i, FALSE, &cA) & qbPeek(ccB->caps, i, FALSE, &cB)){
-		if (wcscmp(sbGetString(cA->text), sbGetString(cB->text)))
+		if (strcmp(sbGetString(cA->text), sbGetString(cB->text)))
 			return FALSE;
 		i++;
 	}
