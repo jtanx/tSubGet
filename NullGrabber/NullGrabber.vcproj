@@ -75,6 +75,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="NullGrabber.manifest"
 				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32"
 				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
 				ComponentFileName="NullGrabber.dll"
@@ -156,6 +157,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="NullGrabber.manifest"
 				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32"
 				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
 				ComponentFileName="NullGrabber.dll"
@@ -221,6 +223,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\NullGrabber.manifest"
+				>
+			</File>
 			<File
 				RelativePath=".\NullGrabber.rc"
 				>

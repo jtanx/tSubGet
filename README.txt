@@ -3,10 +3,13 @@ which is available free of charge.
 
 To build tSubGet (more specifically NullGrabber), 
 you will also need:
-* DirectX 9.0 SDK Update (February 2005) Extras:
-  --> http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=12518
-  --> Compile the 'baseclasses' project within this SDK,
-      and update the path to the generated library
-      correspondingly in the NullGrabber project.
-* Resource Hacker to add 'threadingModel="apartment"' to the comclass def for
-  the NullGrabber manifest
+* DirectShow baseclasses library:
+  --> Install *from* the Windows SDK: 
+      http://www.microsoft.com/en-us/download/details.aspx?id=8279
+  --> Ensure you select the 'Samples' option when installing! The other
+      options are up to you - you don't have to install the other SDK 
+      components, just uncheck them if you don't want them.
+  --> Compile the baseclasses project and update the path to the generated
+      library correspondingly in the NullGrabber project.
+  --> A typical path to this baseclasses project might be:
+      C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses
