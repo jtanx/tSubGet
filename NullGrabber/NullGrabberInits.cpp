@@ -1,4 +1,4 @@
-#include <streams.h>
+#include "streams.h"
 #include <initguid.h>
 #include "NullGrabber.h"
 

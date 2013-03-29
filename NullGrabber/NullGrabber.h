@@ -1,4 +1,5 @@
 #include "NullGrabberInterfaces.h"
+#include "NullGrabberC.h"
 
 //Interface description
 MIDL_INTERFACE("08478C61-D22B-416b-93B5-3379CC027A79")
