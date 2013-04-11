@@ -53,3 +53,46 @@ class CNullGrabber : public CBaseRenderer,
 
 		CNullGrabber(LPUNKNOWN pUnk, HRESULT *phr);
 };
+
+class NGC_Interface : INullGrabberCB 
+{
+	public:
+		NGC_Interface(wchar_t *filepath, const CMediaType *pmtAccept);
+		~NGC_Interface();
+		void SetSampleCallback(NGC_Callback callback, void *userData);
+		void SetProgressCallback(NGC_Progress progress, void *userData);
+		HRESULT Run();
+		void Abort();
+
+		//INullGrabberCB implementations
+		STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+		ULONG STDMETHODCALLTYPE AddRef();
+		ULONG STDMETHODCALLTYPE Release();
+		STDMETHODIMP SampleCB(IMediaSample *pSample,
+			REFERENCE_TIME *StartTime, REFERENCE_TIME *EndTime);
+	private:
+		//Graph data
+		IGraphBuilder *pGraph;
+		IMediaControl *pControl;
+		IMediaEvent *pEvent;
+		IMediaSeeking *pStatus; 
+		IBaseFilter *pSourceF;
+		CNullGrabber *pNullGrabber;
+		__int64 duration;
+
+		//Callback data
+		HRESULT hrCallback; //Return value from callback.
+		HANDLE abortEvent, runEvent;
+		NGC_Callback callback;
+		NGC_Progress progress;
+		void *callbackUserData, *progressUserData;
+		
+
+		//Synchro shit
+		CCritSec m_Lock;
+
+		HRESULT initGraphFilters(wchar_t *filepath, const CMediaType *pmtAccept);
+		bool findPin(IEnumPins *pEnum, IPin **pin, int direction);
+		HRESULT connectFilters();
+		void closeGraph();
+};

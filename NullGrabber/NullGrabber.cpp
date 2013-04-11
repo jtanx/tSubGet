@@ -1,5 +1,6 @@
 #include <streams.h>
 #include <initguid.h>
+#include <new>
 #include "NullGrabber.h"
 
 CNullGrabber::CNullGrabber(LPUNKNOWN pUnk, HRESULT *phr):
@@ -11,7 +12,7 @@ CBaseRenderer(CLSID_NullGrabber, NAME("Null Grabber"), pUnk, phr){
 CUnknown * WINAPI CNullGrabber::CreateInstance(LPUNKNOWN punk, HRESULT *phr) 
 {
     ASSERT(phr);
-    CNullGrabber *pNewObject = new CNullGrabber(punk, phr);
+	CNullGrabber *pNewObject = new (std::nothrow) CNullGrabber(punk, phr);
     if(pNewObject == NULL) {
         if (phr)
             *phr = E_OUTOFMEMORY;

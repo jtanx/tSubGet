@@ -13,3 +13,8 @@ you will also need:
       library correspondingly in the NullGrabber project.
   --> A typical path to this baseclasses project might be:
       C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses
+
+About:
+NullGrabber is really just a glorified sample grabber. The only difference
+between it and the ISampleGrabber sample filter is that it allows _any_
+stream type to be grabbed. It's also implemented as a renderer.
