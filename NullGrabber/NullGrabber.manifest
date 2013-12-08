@@ -1,7 +1,7 @@
 <!-- Manifest fragment to specify the threading model of the COM class.-->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 	<file name="NullGrabber.dll" hashalg="SHA1">
-    		<comClass clsid="{3CFFEB81-A06E-4E1D-AFAB-9E6AF667D087}" threadingModel="Apartment"></comClass>
+    <comClass clsid="{3CFFEB81-A06E-4E1D-AFAB-9E6AF667D087}" threadingModel="Apartment"></comClass>
 	</file>
 </assembly>
 

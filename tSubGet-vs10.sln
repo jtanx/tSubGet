@@ -1,32 +1,19 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGet", "tSubGet\tSubGet.vcproj", "{F904B5F9-1021-4C15-9034-4AA8883E9767}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGet", "tSubGet\tSubGet.vcxproj", "{F904B5F9-1021-4C15-9034-4AA8883E9767}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NullGrabber", "NullGrabber\NullGrabber.vcxproj", "{6AD1881F-392A-4DC7-B587-5F8FD372E851}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGetLib", "tSubGetLib\tSubGetLib.vcxproj", "{ED77E7C1-55F9-494F-9800-8704998B4B66}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "baseLib", "baseLib\baseLib.vcxproj", "{D966ECC9-3366-491D-BFA4-9C534F9C76F2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGetC", "tSubGetC\tSubGetC.vcxproj", "{5C27C4E2-8655-4F81-A81C-E56F46CFF0C8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NullGrabberTest", "NullGrabberTest\NullGrabberTest.vcxproj", "{7EF69E53-B27C-4167-BE8E-DB2F762AE80A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6AD1881F-392A-4DC7-B587-5F8FD372E851} = {6AD1881F-392A-4DC7-B587-5F8FD372E851}
-		{ED77E7C1-55F9-494F-9800-8704998B4B66} = {ED77E7C1-55F9-494F-9800-8704998B4B66}
-		{D966ECC9-3366-491D-BFA4-9C534F9C76F2} = {D966ECC9-3366-491D-BFA4-9C534F9C76F2}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NullGrabber", "NullGrabber\NullGrabber.vcproj", "{6AD1881F-392A-4DC7-B587-5F8FD372E851}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGetLib", "tSubGetLib\tSubGetLib.vcproj", "{ED77E7C1-55F9-494F-9800-8704998B4B66}"
-	ProjectSection(ProjectDependencies) = postProject
-		{6AD1881F-392A-4DC7-B587-5F8FD372E851} = {6AD1881F-392A-4DC7-B587-5F8FD372E851}
-		{D966ECC9-3366-491D-BFA4-9C534F9C76F2} = {D966ECC9-3366-491D-BFA4-9C534F9C76F2}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "baseLib", "baseLib\baseLib.vcproj", "{D966ECC9-3366-491D-BFA4-9C534F9C76F2}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubGetC", "tSubGetC\tSubGetC.vcproj", "{5C27C4E2-8655-4F81-A81C-E56F46CFF0C8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{ED77E7C1-55F9-494F-9800-8704998B4B66} = {ED77E7C1-55F9-494F-9800-8704998B4B66}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tSubTesting", "tSubTesting\tSubTesting.vcproj", "{20EB54E6-FA7D-49F3-8441-371F2B78A3C9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{6AD1881F-392A-4DC7-B587-5F8FD372E851} = {6AD1881F-392A-4DC7-B587-5F8FD372E851}
-		{ED77E7C1-55F9-494F-9800-8704998B4B66} = {ED77E7C1-55F9-494F-9800-8704998B4B66}
 	EndProjectSection
 EndProject
 Global
@@ -55,10 +42,10 @@ Global
 		{5C27C4E2-8655-4F81-A81C-E56F46CFF0C8}.Debug|Win32.Build.0 = Debug|Win32
 		{5C27C4E2-8655-4F81-A81C-E56F46CFF0C8}.Release|Win32.ActiveCfg = Release|Win32
 		{5C27C4E2-8655-4F81-A81C-E56F46CFF0C8}.Release|Win32.Build.0 = Release|Win32
-		{20EB54E6-FA7D-49F3-8441-371F2B78A3C9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{20EB54E6-FA7D-49F3-8441-371F2B78A3C9}.Debug|Win32.Build.0 = Debug|Win32
-		{20EB54E6-FA7D-49F3-8441-371F2B78A3C9}.Release|Win32.ActiveCfg = Release|Win32
-		{20EB54E6-FA7D-49F3-8441-371F2B78A3C9}.Release|Win32.Build.0 = Release|Win32
+		{7EF69E53-B27C-4167-BE8E-DB2F762AE80A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7EF69E53-B27C-4167-BE8E-DB2F762AE80A}.Debug|Win32.Build.0 = Debug|Win32
+		{7EF69E53-B27C-4167-BE8E-DB2F762AE80A}.Release|Win32.ActiveCfg = Release|Win32
+		{7EF69E53-B27C-4167-BE8E-DB2F762AE80A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -288,3 +288,103 @@ void convertMsToRTime(__int64 ms, RTime *rt){
 	rt->ms = ms%1000;
 }
 /////////////////////////////END HELPER ROUTINES/////////////////////////////
+
+HRESULT parseSampleV2(
+	unsigned char *buffer, long length, __int64 timestamp, void *userData) 
+{
+	
+}
+
+/*static HRESULT parseSample(unsigned char* buffer, long length, __int64 timestamp, void *userData) {
+	int i, ret, count;
+	unsigned char rawHeader[10]; //Page header packet data (Y=0)
+	unsigned packetNum, curPage;
+	TSG_Parser *parser = userData;
+	int displayPageNo;
+	BOOL bSubtitle = FALSE, bNewsflash = FALSE;
+
+	if (length < TT_PACKETSIZE) //Not enough to process anything!
+		return S_OK; 
+	for (i = 0; i < 10; i++){
+		rawHeader[i] = fixHamm8[buffer[i]];
+		if (rawHeader[i] & 0x80) //Erroneous packet
+			return S_OK;
+	}
+	
+	packetNum = (rawHeader[1] << 1) | (rawHeader[0] >> 3);
+	curPage = ((rawHeader[0] & 0x7) << 8)|(rawHeader[3] << 4)|(rawHeader[2]);
+	if (packetNum != 0 )//|| curPage != p->po.pageNumber)
+		return S_OK; //Check
+	bSubtitle = rawHeader[5] & (1 << 3);
+	bNewsflash = rawHeader[5] & (1 << 2);
+
+	displayPageNo = !(curPage >> 8) ? curPage | 8 << 8 : curPage;
+
+	count = length / TT_PACKETSIZE;
+	for (i = 0; i < count; i++) {
+		unsigned char ham[2];
+		unsigned __int8 a, y;
+		ham[0] = fixHamm8[buffer[i * TT_PACKETSIZE]];
+		ham[1] = fixHamm8[buffer[i * TT_PACKETSIZE + 1]];
+		a = ham[1] << 4 | ham[0];
+		y = (a >> 3) & 0x1f;
+
+		packetNum = (ham[0] >> 3) | (ham[1] << 1);
+		if (packetNum == 0 && i > 0) {
+			printf("Page header packet found mid-sample!\n\n");
+		} else if (packetNum != y) {
+			printf ("SHIT!!\n\n\n\n");
+			system("pause");
+		} else if ((ham[0] >> 4)) {
+			printf ("durf");
+			system("pause");
+		}
+		
+		if (displayPageNo == 0x801 && packetNum != 0 && packetNum != 2) {
+			int j;
+			BOOL bStartFlag = FALSE;
+			printf ("Packet number: %d (i=%d) for page %03X\n", packetNum, i, displayPageNo);
+			printf ("Subtitle signaled: %s\n", bSubtitle ? "yes" : "no");
+			printf ("Newsflash signaled: %s\n", bNewsflash ? "yes" : "no");
+			for (j = 2; j < TT_PACKETSIZE; j++) {
+				unsigned char c = fixParity[buffer[i * TT_PACKETSIZE + j]];
+				if (c & 0x80)
+					printf (" ");
+				else {
+					printf("%c", fixParity[buffer[i * TT_PACKETSIZE + j]]);
+					if (c == 0x0b) {
+						bStartFlag = TRUE;
+					}
+				}
+			}
+			printf ("\n");
+			printf ("Start flag: %s\n==\n", bStartFlag ? "yes" : "no");
+			
+		}
+	}
+
+/////////////IGNORE////////////////////////////////////////
+	//if (displayPageNo == 0x801)
+	//system("pause");
+	int i, j, ret;
+	int bufPos = TT_PACKETSIZE;
+
+	//NB: Third parameter determines if this page is an 'erase' page. ('Byte 9, bit 8')
+	ccEnd(p->cc, smp.time, (fixHamm48[smp.pBuf[5]] & 1 << 3));
+	ccStart(p->cc, smp.time);
+	
+	for (i = 0; i < TT_PACKETSPP - 1; i++, bufPos += TT_PACKETSIZE){
+		unsigned char mag = fixHamm48[smp.pBuf[bufPos]] & 0x7;
+		if (mag & 0x80 || mag != p->po.pageNumber >> 8) continue;
+		
+		for (j = 2; j < TT_PACKETSIZE; j++){
+			unsigned char val = fixParity[smp.pBuf[bufPos+j]];
+			if (val & 0x80) continue;
+
+			ret = capAdd(p, j, i, val);
+			if (ret != PARSER_OK)
+				return ret;
+		}
+	}	
+	return S_OK;
+}*/

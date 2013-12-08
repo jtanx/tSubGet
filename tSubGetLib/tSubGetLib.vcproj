@@ -151,10 +151,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\tSubCallback.c"
-				>
-			</File>
-			<File
 				RelativePath=".\tSubCaption.c"
 				>
 			</File>
@@ -163,11 +159,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tSubGetLib.c"
+				>
+			</File>
+			<File
 				RelativePath=".\tSubParser.c"
 				>
 			</File>
 			<File
-				RelativePath=".\tSubReader.c"
+				RelativePath=".\tSubToolset.c"
 				>
 			</File>
 		</Filter>
@@ -181,7 +181,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tSubGetLibV2.h"
+				>
+			</File>
+			<File
 				RelativePath=".\tSubInternal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tSubInternalV2.h"
 				>
 			</File>
 		</Filter>

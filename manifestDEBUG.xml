@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+	<assemblyIdentity name="NullGrabber" processorArchitecture="X86" type="win32" version="0.8.5.0">
+	</assemblyIdentity>
+	
+	<dependency>
+		<dependentAssembly>
+			<assemblyIdentity type="win32" name="Microsoft.VC90.DebugCRT" version="9.0.21022.8" processorArchitecture="x86" publicKeyToken="1fc8b3b9a1e18e3b">
+			</assemblyIdentity>
+		</dependentAssembly>
+	</dependency>
+
+	<file name="NullGrabber.dll" hashalg="SHA1">
+		<comClass clsid="{3CFFEB81-A06E-4E1D-AFAB-9E6AF667D087}" tlbid="{ED0469E0-171F-11E1-BDDB-0800200C9A66}" description="NullGrabber class">
+		</comClass>
+
+		<typelib tlbid="{ED0469E0-171F-11E1-BDDB-0800200C9A66}" version="0.0" helpdir="" flags="HASDISKIMAGE">
+		</typelib>
+	</file>
+
+	<comInterfaceExternalProxyStub name="INullGrabber" iid="{96287A17-9D0A-4BCC-AD30-1E44A0ABE9D1}" tlbid="{ED0469E0-171F-11E1-BDDB-0800200C9A66}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" baseInterface="{00000000-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+
+	<comInterfaceExternalProxyStub name="INullGrabberCB" iid="{08478C61-D22B-416B-93B5-3379CC027A79}" tlbid="{ED0469E0-171F-11E1-BDDB-0800200C9A66}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" baseInterface="{00000000-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+
+	<comInterfaceExternalProxyStub name="IMediaSample" iid="{56A8689A-0AD4-11CE-B03A-0020AF0BA770}" tlbid="{ED0469E0-171F-11E1-BDDB-0800200C9A66}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" baseInterface="{00000000-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+</assembly>
+
+

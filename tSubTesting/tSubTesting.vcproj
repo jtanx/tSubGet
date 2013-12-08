@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="NullGrabber"
-	ProjectGUID="{6AD1881F-392A-4DC7-B587-5F8FD372E851}"
-	RootNamespace="NullGrabber"
+	Name="tSubTesting"
+	ProjectGUID="{20EB54E6-FA7D-49F3-8441-371F2B78A3C9}"
+	RootNamespace="tSubTesting"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -18,9 +18,9 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\Bin\Debug"
+			OutputDirectory="$(SolutionDir)\Bin\$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			>
 			<Tool
@@ -41,8 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;NULLGRABBER_EXPORTS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -55,19 +54,15 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_UNICODE;UNICODE;_DEBUG"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib &quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses\Debug\strmbasd.lib&quot;"
 				LinkIncremental="2"
-				EnableUAC="false"
-				ModuleDefinitionFile="NullGrabber.def"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -75,10 +70,6 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				AdditionalManifestFiles="NullGrabber.manifest"
-				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32"
-				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
-				ComponentFileName="NullGrabber.dll"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -98,9 +89,9 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\Bin"
+			OutputDirectory="$(SolutionDir)\Bin\$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -123,9 +114,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;NULLGRABBER_EXPORTS"
-				RuntimeLibrary="0"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -142,12 +132,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib &quot;C:\Program Files\Microsoft SDKs\Windows\v7.1\Samples\multimedia\directshow\baseclasses\Release\strmbase.lib&quot;"
 				LinkIncremental="1"
-				EnableUAC="false"
-				ModuleDefinitionFile="NullGrabber.def"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -157,10 +144,6 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				AdditionalManifestFiles="NullGrabber.manifest"
-				AssemblyIdentity="NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32"
-				TypeLibraryFile="$(IntDir)\NullGrabber.tlb"
-				ComponentFileName="NullGrabber.dll"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -188,23 +171,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\NullGrabber.cpp"
+				RelativePath=".\Bootstrapper.c"
 				>
 			</File>
 			<File
-				RelativePath=".\NullGrabber.def"
+				RelativePath=".\NullGrabberTest.c"
 				>
 			</File>
 			<File
-				RelativePath=".\NullGrabber.idl"
-				>
-			</File>
-			<File
-				RelativePath=".\NullGrabberC.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\NullGrabberInits.cpp"
+				RelativePath=".\tSubGetLibV2Test.c"
 				>
 			</File>
 		</Filter>
@@ -214,15 +189,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\NullGrabber.h"
-				>
-			</File>
-			<File
-				RelativePath=".\NullGrabberC.h"
-				>
-			</File>
-			<File
-				RelativePath=".\NullGrabberInterfaces.h"
+				RelativePath=".\tSubTesting.h"
 				>
 			</File>
 		</Filter>
@@ -231,14 +198,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\NullGrabber.manifest"
-				>
-			</File>
-			<File
-				RelativePath=".\NullGrabber.rc"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
