@@ -1,5 +1,5 @@
-tSubGet is built using Microsoft Visual C++ 2008 Express,
-which is available free of charge.
+tSubGet is built using Microsoft Visual C++ 2010.
+It should compile with the express version, which is available free-of-charge.
 
 To build tSubGet (more specifically NullGrabber), 
 you will also need:
