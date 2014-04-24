@@ -181,7 +181,7 @@ int wmain(int argc, wchar_t *argv[]){
 	//Default colours
 	memset(&po.fmt, -1, sizeof(OutputFormatting));
 
-	wprintf (L"tSubGetC - Version: 0.9, Core version: %s (%s)\n\n",BUILD_VERSION, BUILD_DATE);
+	wprintf (L"tSubGetC - Version: 0.9b, Core version: %s (%s)\n\n",BUILD_VERSION, BUILD_DATE);
 	if (argc < 2){
 		printHelp(argv[0]);
 		return 1;
