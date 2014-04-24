@@ -158,7 +158,7 @@ void ifOnCommand(HWND hwnd, int id, HWND hwndCtl, InterfaceOpts *io){
 				L"tSubGet extracts teletext-formatted subtitles (usually from DVB-style recordings) "
 				L"that may be present in WTV or DVR-MS files. Note that only DVR-MS files are "
 				L"supported in Windows XP.\n\n"
-				L"caketrim 2012", GUI_BUILD_VERSION, BUILD_VERSION, BUILD_DATE);
+				L"Jeremy Tan - 2014", GUI_BUILD_VERSION, BUILD_VERSION, BUILD_DATE);
 			MessageBox(hwnd, buf, L"About", MB_ICONINFORMATION);
 		} break;
 

@@ -63,7 +63,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalManifestDependencies>type='win32'  name='NullGrabber' version='0.8.6.0' processorArchitecture='X86';%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <AdditionalManifestDependencies>type='win32'  name='NullGrabber' version='0.8.6.0' processorArchitecture='X86'</AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -82,7 +82,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalManifestDependencies>type='win32'  name='NullGrabber' version='0.8.5.0' processorArchitecture='X86';%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <AdditionalManifestDependencies>type='win32'  name='NullGrabber' version='0.8.6.0' processorArchitecture='X86'</AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

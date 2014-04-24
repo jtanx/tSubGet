@@ -106,7 +106,7 @@
     </Link>
     <Manifest>
       <AdditionalManifestFiles>NullGrabber.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
-      <AssemblyIdentity>NullGrabber, processorArchitecture=X86, version=0.8.5.0, type=win32</AssemblyIdentity>
+      <AssemblyIdentity>NullGrabber, processorArchitecture=X86, version=0.8.6.0, type=win32</AssemblyIdentity>
       <TypeLibraryFile>$(IntDir)NullGrabber.tlb</TypeLibraryFile>
       <ComponentFileName>NullGrabber.dll</ComponentFileName>
     </Manifest>
