@@ -1,5 +1,8 @@
+*.sdf
+*.opensdf
 *.user
 *.suo
+*.filters
 *.ncb
 Bin
 **/Debug/

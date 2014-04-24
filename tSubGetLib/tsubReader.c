@@ -131,10 +131,40 @@ static int addFilters(FileReader *fr, wchar_t *fileIn){
 							&IID_IBaseFilter,&fr->pNullGrabberF);
 	if (FAILED(hr))
 		return PARSER_E_COM;
-	hr = fr->pGraph->lpVtbl->AddSourceFilter(fr->pGraph,fileIn,
-												L"Source",&fr->pSourceF);
-	if (FAILED(hr))
-		return PARSER_E_IN;
+
+	hr = CoCreateInstance(&CLSID_StreamBufferSource, NULL, CLSCTX_INPROC_SERVER,
+							&IID_IBaseFilter, &fr->pSourceF);
+	if (FAILED(hr)) {
+		fr->pSourceF = NULL;
+	} else {
+		IFileSourceFilter *f;
+		hr = fr->pSourceF->lpVtbl->QueryInterface(fr->pSourceF, &IID_IFileSourceFilter, &f);
+		if (FAILED(hr)) {
+			fr->pSourceF->lpVtbl->Release(fr->pSourceF);
+			fr->pSourceF = NULL;
+		}
+
+		hr = f->lpVtbl->Load(f, fileIn, NULL);
+		f->lpVtbl->Release(f);
+		if (FAILED(hr)) {
+			fr->pSourceF->lpVtbl->Release(fr->pSourceF);
+			fr->pSourceF = NULL;
+		} else {
+			hr = fr->pGraph->lpVtbl->AddFilter(fr->pGraph, fr->pSourceF, L"Source");
+			if (FAILED(hr)) {
+				fr->pSourceF->lpVtbl->Release(fr->pSourceF);
+				fr->pSourceF = NULL;
+			}
+		}
+	}
+
+	if (fr->pSourceF == NULL) {
+		hr = fr->pGraph->lpVtbl->AddSourceFilter(fr->pGraph,fileIn,
+													L"Source",&fr->pSourceF);
+		if (FAILED(hr)) {
+			return PARSER_E_IN;
+		}
+	}
 	hr = fr->pGraph->lpVtbl->AddFilter(fr->pGraph,fr->pNullGrabberF,L"Null Grabber");
 	if (FAILED(hr))
 		return PARSER_E_COM;

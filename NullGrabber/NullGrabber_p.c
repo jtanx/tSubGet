@@ -3,18 +3,18 @@
 /* this ALWAYS GENERATED file contains the proxy stub code */
 
 
- /* File created by MIDL compiler version 7.00.0500 */
-/* at Tue Apr 02 16:57:43 2013
+ /* File created by MIDL compiler version 7.00.0555 */
+/* at Thu Apr 24 08:51:13 2014
  */
-/* Compiler settings for .\NullGrabber.idl:
-    Oicf, W1, Zp8, env=Win32 (32b run)
+/* Compiler settings for NullGrabber.idl:
+    Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 
     protocol : dce , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
          DECLSPEC_UUID(), MIDL_INTERFACE()
 */
-//@@MIDL_FILE_HEADING(  )
+/* @@MIDL_FILE_HEADING(  ) */
 
 #if !defined(_M_IA64) && !defined(_M_AMD64)
 
@@ -44,7 +44,7 @@
 #include "rpcproxy.h"
 #ifndef __RPCPROXY_H_VERSION__
 #error this stub requires an updated version of <rpcproxy.h>
-#endif // __RPCPROXY_H_VERSION__
+#endif /* __RPCPROXY_H_VERSION__ */
 
 
 #include "NullGrabber_h.h"
@@ -74,7 +74,7 @@ typedef struct _NullGrabber_MIDL_EXPR_FORMAT_STRING
     } NullGrabber_MIDL_EXPR_FORMAT_STRING;
 
 
-static RPC_SYNTAX_IDENTIFIER  _RpcTransferSyntax = 
+static const RPC_SYNTAX_IDENTIFIER  _RpcTransferSyntax = 
 {{0x8A885D04,0x1CEB,0x11C9,{0x9F,0xE8,0x08,0x00,0x2B,0x10,0x48,0x60}},{2,0}};
 
 
@@ -103,7 +103,7 @@ extern const MIDL_STUBLESS_PROXY_INFO INullGrabber_ProxyInfo;
 #endif
 
 #if !(TARGET_IS_NT50_OR_LATER)
-#error You need a Windows 2000 or later to run this stub because it uses these features:
+#error You need Windows 2000 or later to run this stub because it uses these features:
 #error   /robust command line switch.
 #error However, your C/C++ compilation flags indicate you intend to run this app on earlier systems.
 #error This app will fail with the RPC_X_WRONG_STUB_VERSION error.
@@ -488,7 +488,7 @@ static const MIDL_STUB_DESC Object_StubDesc =
     1, /* -error bounds_check flag */
     0x50002, /* Ndr library version */
     0,
-    0x70001f4, /* MIDL Version 7.0.500 */
+    0x700022b, /* MIDL Version 7.0.555 */
     0,
     0,
     0,  /* notify & notify_flag routine table */
@@ -498,14 +498,14 @@ static const MIDL_STUB_DESC Object_StubDesc =
     0
     };
 
-const CInterfaceProxyVtbl * _NullGrabber_ProxyVtblList[] = 
+const CInterfaceProxyVtbl * const _NullGrabber_ProxyVtblList[] = 
 {
     ( CInterfaceProxyVtbl *) &_INullGrabberProxyVtbl,
     ( CInterfaceProxyVtbl *) &_INullGrabberCBProxyVtbl,
     0
 };
 
-const CInterfaceStubVtbl * _NullGrabber_StubVtblList[] = 
+const CInterfaceStubVtbl * const _NullGrabber_StubVtblList[] = 
 {
     ( CInterfaceStubVtbl *) &_INullGrabberStubVtbl,
     ( CInterfaceStubVtbl *) &_INullGrabberCBStubVtbl,
@@ -536,7 +536,7 @@ const ExtendedProxyFileInfo NullGrabber_ProxyFileInfo =
     (PCInterfaceProxyVtblList *) & _NullGrabber_ProxyVtblList,
     (PCInterfaceStubVtblList *) & _NullGrabber_StubVtblList,
     (const PCInterfaceName * ) & _NullGrabber_InterfaceNamesList,
-    0, // no delegation
+    0, /* no delegation */
     & _NullGrabber_IID_Lookup, 
     2,
     2,

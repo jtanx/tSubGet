@@ -1,15 +1,41 @@
 #include "tSubGetC.h"
 
+#ifdef _DEBUG
+int isStandalone() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    if (!GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE), &csbi)){
+        printf( "GetConsoleScreenBufferInfo failed: %lu\n", GetLastError());
+        return FALSE;
+    }
+
+    // if cursor position is (0,0) then we were launched in a separate console
+    return ((!csbi.dwCursorPosition.X) && (!csbi.dwCursorPosition.Y));
+}
+
+static void noClose() {
+	system("pause");
+}
+#endif
+
 static void printHelp(wchar_t *exec){
-	wprintf (L"Usage:\n%s [-d msDelay] [-p pageNum] [-o fileOut] [-c] [-y] [-l langid] fileIn\n", exec);
-	wprintf (L"\t[-d msDelay]\tDelay in ms to add to each caption. Can be "
+	int i;
+	wprintf (L"Usage:\n%s [-d delay] [-p page] [-o out] [-c] [-s col,cs] [-y] [-l langid] fileIn\n", exec);
+	wprintf (L"\t[-d delay]\tDelay in ms to add to each caption. Can be "
 			 L"positive\n\t\t\tor negative.\n");
-	wprintf (L"\t[-p pageNum]\tSpecifies the teletext page on which to search for\n"
+	wprintf (L"\t[-p page]\tSpecifies the teletext page on which to search for\n"
 			 L"\t\t\tcaptions. Defaults to page 801 (Australian default)\n");
-	wprintf (L"\t[-o fileOut]\tSpecifies the output file. Defaults to the"
+	wprintf (L"\t[-o out]\tSpecifies the output file. Defaults to the"
 			 L"\n\t\t\toriginal filename with the extension removed and"
 			 L"\n\t\t\t'.srt' appended.\n");
 	wprintf (L"\t[-c]\t\tAdds colour tags to the output, if present.\n");
+	wprintf (L"\t[-s col,cs]\tOverrides the default colour used. The colour must be\n");
+	wprintf (L"\t\t\tin hexadecimal format. Example: -s red,FF2211\n");
+	wprintf (L"\n\t\t\tAvailable colours:\n\t\t\t");
+	for (i = 0; i < NUM_COLOURS; i++) {
+		wprintf (L"%s ", colourSet[i]);
+	}
+	wprintf(L"\n");
 	wprintf (L"\t[-y]\t\tOverwrites the output without prompt.\n");
 	wprintf (L"\t[-l langid]\tSelects the required language id. For a list of IDs,"
 			 L"\n\t\t\tenter 'help' instead of an id.\n");
@@ -23,6 +49,31 @@ static int parseArgs(ParserOpts *po, int *pos, int argc, wchar_t *argv[]){
 
 			case L'y': po->overwriteOutput = TRUE; break;
 			
+			case L's': {
+				wchar_t *failPtr;
+				wchar_t *val, *ptr;
+				int i;
+				if (*pos == argc - 1) return FALSE;
+				
+				val = argv[++(*pos)];
+				if ((ptr = wcschr(val, L',')) == NULL) return FALSE;
+
+				*ptr++ = L'\0';
+				for (i = 0; i < NUM_COLOURS; i++) {
+					if (!_wcsicmp(colourSet[i], val)) {
+						if (*ptr) {
+							po->fmt.fgColour[i] = wcstol(ptr, &failPtr, 16);
+							po->fmt.fgColour[i] &= 0xFFFFFF; //No overflow
+							if (*failPtr != L'\0') return FALSE;
+						} else {
+							po->fmt.fgColour[i] = -1; //Default colour
+						}
+						break;
+					}
+				}
+				if (i == NUM_COLOURS) return FALSE;
+			} break;
+
 			case L'd':{
 				wchar_t *failPtr;
 				if (*pos == argc - 1) return FALSE;
@@ -83,6 +134,14 @@ static void printArgs(ParserOpts *po){
 	wprintf (L"Input file:\t\t\t\"%s\"\n",po->fileIn);
 	wprintf (L"Output file:\t\t\t\"%s\"\n",po->fileOut[0] == L'\0' ? L"Default" : po->fileOut);
 	wprintf (L"Add colour tags:\t\t%s\n", po->addColourTags ? L"Yes" : L"No");
+	if (po->addColourTags) {
+		int i;
+		for (i = 0; i < NUM_COLOURS; i++) {
+			if (po->fmt.fgColour[i] >= 0) {
+				wprintf(L"\t\t\t\t'%s' -> %06X\n", colourSet[i], po->fmt.fgColour[i]);
+			}
+		}
+	}
 	wprintf (L"Overwrite without prompt:\t%s\n", po->overwriteOutput ? L"Yes": L"No");
 	wprintf (L"Delay:\t\t\t\t%lld ms\n",po->delay);
 	wprintf (L"Teletext page:\t\t\t%.3X\n",!(po->pageNumber >> 8) ? (po->pageNumber | 8 << 8) : po->pageNumber);
@@ -111,6 +170,16 @@ int wmain(int argc, wchar_t *argv[]){
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	ParserOpts po = {0};
 	CaptionsParser *p;
+
+#ifdef _DEBUG
+	if (isStandalone()) {
+		atexit(noClose);
+	}
+	wprintf(L"!!!!DEBUG VERSION!!!!\n");
+#endif
+
+	//Default colours
+	memset(&po.fmt, -1, sizeof(OutputFormatting));
 
 	wprintf (L"tSubGetC - Version: 0.9, Core version: %s (%s)\n\n",BUILD_VERSION, BUILD_DATE);
 	if (argc < 2){

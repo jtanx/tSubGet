@@ -11,6 +11,8 @@
 #define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
 #define IsLangId(id) (id >= LANGID_DEFAULT && id < LANGID_NULL)
 
+#define NUM_COLOURS 8
+
 enum ParserCodes {
 	PARSER_OK,
 	PARSER_E_NOCAPS,
@@ -43,7 +45,7 @@ typedef enum LangID {
 } LangID;
 
 typedef struct OutputFormatting {
-	int fgColour[8];
+	int fgColour[NUM_COLOURS];
 } OutputFormatting;
 
 typedef struct ParserOpts {
