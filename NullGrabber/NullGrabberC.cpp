@@ -156,9 +156,38 @@ HRESULT NGC_Interface::initGraphFilters(wchar_t *filepath, const CMediaType *pmt
 		pMedia->SetSyncSource(NULL);
 		pMedia->Release();
 
-		hr = pGraph->AddSourceFilter(filepath, L"Source", &pSourceF);
-		if (FAILED(hr))
-			return hr;
+		//Try to use StreamBufferSource first, if possible.
+		hr = CoCreateInstance(CLSID_StreamBufferSource, NULL, CLSCTX_INPROC_SERVER,
+								IID_IBaseFilter, (void**) &pSourceF);
+		if (FAILED(hr)) {
+			pSourceF = NULL;
+		} else {
+			IFileSourceFilter *f;
+			hr = pSourceF->QueryInterface(IID_IFileSourceFilter, (void**) &f);
+			if (FAILED(hr)) {
+				pSourceF->Release();
+				pSourceF = NULL;
+			} else {
+				hr = f->Load(filepath, NULL);
+				f->Release();
+				if (FAILED(hr)) {
+					pSourceF->Release();
+					pSourceF = NULL;
+				} else {
+					hr = pGraph->AddFilter(pSourceF, L"Source");
+					if (FAILED(hr)) {
+						pSourceF->Release();
+						pSourceF = NULL;
+					}
+				}
+			}
+		}
+
+		if (pSourceF == NULL) {
+			hr = pGraph->AddSourceFilter(filepath, L"Source", &pSourceF);
+			if (FAILED(hr))
+				return hr;
+		}
 		
 		//Manual instantiation - correct??
 		pNullGrabber = (CNullGrabber*) CNullGrabber::CreateInstance(NULL, &hr);

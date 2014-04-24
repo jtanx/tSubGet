@@ -142,18 +142,18 @@ static int addFilters(FileReader *fr, wchar_t *fileIn){
 		if (FAILED(hr)) {
 			fr->pSourceF->lpVtbl->Release(fr->pSourceF);
 			fr->pSourceF = NULL;
-		}
-
-		hr = f->lpVtbl->Load(f, fileIn, NULL);
-		f->lpVtbl->Release(f);
-		if (FAILED(hr)) {
-			fr->pSourceF->lpVtbl->Release(fr->pSourceF);
-			fr->pSourceF = NULL;
 		} else {
-			hr = fr->pGraph->lpVtbl->AddFilter(fr->pGraph, fr->pSourceF, L"Source");
+			hr = f->lpVtbl->Load(f, fileIn, NULL);
+			f->lpVtbl->Release(f);
 			if (FAILED(hr)) {
 				fr->pSourceF->lpVtbl->Release(fr->pSourceF);
 				fr->pSourceF = NULL;
+			} else {
+				hr = fr->pGraph->lpVtbl->AddFilter(fr->pGraph, fr->pSourceF, L"Source");
+				if (FAILED(hr)) {
+					fr->pSourceF->lpVtbl->Release(fr->pSourceF);
+					fr->pSourceF = NULL;
+				}
 			}
 		}
 	}
