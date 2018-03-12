@@ -7,7 +7,7 @@
 #include "tSubDefs.h"
 #include "..\\tSubGetLib\\tSubGetLib.h"
 
-#define GUI_BUILD_VERSION L"0.9.6"
+#define GUI_BUILD_VERSION L"0.9.7"
 
 typedef struct InterfaceOpts {
 	ParserOpts po;

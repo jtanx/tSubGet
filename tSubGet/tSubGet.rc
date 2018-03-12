@@ -1,4 +1,6 @@
-#include "tSubGet.h"
+#include <commctrl.h>
+#include <windows.h>
+#include "tSubDefs.h"
 
 IDI_ICON ICON "tSubGet.ico"
 

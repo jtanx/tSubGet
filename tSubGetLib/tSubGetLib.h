@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <windows.h>
 
-#define BUILD_VERSION		L"0.9.6.6"
+#define BUILD_VERSION		L"0.9.7"
 //#define BUILD_COUNT			15
-#define BUILD_DATE			L"24 Apr 2014"
+#define BUILD_DATE			L"12 Mar 2018"
 #define IsEventActive(hEvent) (WaitForSingleObject((hEvent),0) == WAIT_OBJECT_0)
 #define IsLangId(id) (id >= LANGID_DEFAULT && id < LANGID_NULL)
 
@@ -56,6 +56,7 @@ typedef struct ParserOpts {
 	LangID langId;
 	unsigned addColourTags;
 	unsigned overwriteOutput;
+	unsigned skipOutput;
 	unsigned pageNumber;	
 	__int64 delay;
 } ParserOpts;
